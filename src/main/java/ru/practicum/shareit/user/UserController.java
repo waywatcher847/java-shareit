@@ -39,9 +39,9 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto create(@Valid @RequestBody UserDtoNew UserDto) {
-        log.info("Post: /users " + UserDto);
-        return userService.create(UserDto);
+    public UserDto create(@Valid @RequestBody UserDtoNew userDto) {
+        log.info("Post: /users " + userDto);
+        return userService.create(userDto);
     }
 
     @PatchMapping("/{userId}")

@@ -31,17 +31,17 @@ public class ItemMapper {
                 .request(new ItemRequest()).build();
     }
 
-    public static Item updateItemField(Item item, ItemDtoUpdate ItemDto) {
-        if (ItemDto.hasName()) {
-            item.setName(ItemDto.getName());
+    public static Item updateItemField(Item item, ItemDtoUpdate itemDto) {
+        if (itemDto.hasName()) {
+            item.setName(itemDto.getName());
         }
 
-        if (ItemDto.hasDescription()) {
-            item.setDescription(ItemDto.getDescription());
+        if (itemDto.hasDescription()) {
+            item.setDescription(itemDto.getDescription());
         }
 
-        if (ItemDto.hasAvailable()) {
-            item.setAvailable(ItemDto.getAvailable());
+        if (itemDto.hasAvailable()) {
+            item.setAvailable(itemDto.getAvailable());
         }
         return item;
     }

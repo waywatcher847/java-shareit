@@ -77,7 +77,7 @@ public class UserServiceInMemory implements UserService {
                                 .getEmail()))
                 .findFirst();
         if (user.isPresent()) {
-            throw new ConflictException("Email already exist: " + updateUserDto.getEmail() );
+            throw new ConflictException("Email already exist: " + updateUserDto.getEmail());
         }
         User userResult = userStorage.getById(userId);
         if (userResult == null) {

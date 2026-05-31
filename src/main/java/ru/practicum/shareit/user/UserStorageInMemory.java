@@ -55,8 +55,8 @@ public class UserStorageInMemory implements UserStorage {
     }
 
     private Integer counter() {
-        int currentMaxId = users.keySet().stream().
-                mapToInt(id -> id)
+        int currentMaxId = users.keySet().stream()
+                .mapToInt(id -> id)
                 .max().orElse(0);
 
         return ++currentMaxId;
