@@ -45,9 +45,9 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
-    public UserDto update(@Valid @RequestBody UserDtoUpdate UserDto, @PathVariable("userId") Integer userId) {
+    public UserDto update(@Valid @RequestBody UserDtoUpdate userDto, @PathVariable("userId") Integer userId) {
         log.info("Patch: /users/" + userId);
-        return userService.update(UserDto, userId);
+        return userService.update(userDto, userId);
     }
 
     @DeleteMapping("/{userId}")
