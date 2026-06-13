@@ -8,8 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.request.ItemRequest;
-import ru.practicum.shareit.user.User;
 
 @Data
 @AllArgsConstructor
@@ -25,6 +23,6 @@ public class ItemDtoNew {
     private String description;
     @NotNull
     private Boolean available;
-    private User owner;
-    private ItemRequest request;
+
+    private Integer request;
 }

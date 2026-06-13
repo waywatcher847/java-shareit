@@ -6,12 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.request.ItemRequest;
-import ru.practicum.shareit.user.User;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,8 +18,7 @@ public class ItemDtoUpdate {
     @Size(max = 200, message = "Description max length os 200")
     private String description;
     private Boolean available;
-    private User owner;
-    private ItemRequest request;
+    private Integer request;
 
     public boolean hasName() {
         return !(name == null || name.isBlank());
