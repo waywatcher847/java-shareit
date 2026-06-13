@@ -23,13 +23,13 @@ public class BookingDtoNew {
     @FutureOrPresent(message = "Date can't be in the past")
     private LocalDateTime start;
 
-    @Future(message =  "Date must be in the future" )
+    @Future(message =  "Date must be in the future")
     private LocalDateTime end;
 
     @NotNull
     private Integer itemId;
 
-    @AssertTrue(message = "Dates should be chronological" )
+    @AssertTrue(message = "Dates should be chronological")
     public boolean isValid() {
         if (start == null || end == null) {
             return false;
