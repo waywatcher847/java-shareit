@@ -99,7 +99,7 @@ public class BookingServiceImpl implements BookingService {
         if (booking.getItem().getOwner().equals(user)) {
             if (booking.getStatus().equals(BookingStatus.WAITING)) {
                 boolean hasOverlap = bookingRepository.existsByItemIdAndStatusAndEndGreaterThanEqualAndStartLessThanEqual(
-                        booking.getItem().getId(), BookingStatus.APPROVED, booking.getStart(), booking.getEnd() );
+                        booking.getItem().getId(), BookingStatus.APPROVED, booking.getStart(), booking.getEnd());
 
                 if (!hasOverlap) {
                     booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
@@ -218,7 +218,7 @@ public class BookingServiceImpl implements BookingService {
                     ? bookingRepository.findByBookerIdOrderByStartDesc(userId, pageable)
                     : bookingRepository.findByItemOwnerIdOrderByStartDesc(userId, pageable);
             case CURRENT -> isBooker
-                    ? bookingRepository.findByBookerIdAndStatusAndStartLessThanEqualAndEndGreaterThanEqualOrderByStartDesc(userId, BookingStatus.APPROVED, now , now, pageable)
+                    ? bookingRepository.findByBookerIdAndStatusAndStartLessThanEqualAndEndGreaterThanEqualOrderByStartDesc(userId, BookingStatus.APPROVED, now, now, pageable)
                     : bookingRepository.findByItemOwnerIdAndStatusAndStartLessThanEqualAndEndGreaterThanEqualOrderByStartDesc(userId, BookingStatus.APPROVED, now, now, pageable);
             case PAST -> isBooker
                     ? bookingRepository.findByBookerIdAndStatusAndEndBeforeOrderByStartDesc(userId, BookingStatus.APPROVED, now, pageable)

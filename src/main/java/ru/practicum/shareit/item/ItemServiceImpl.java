@@ -17,6 +17,7 @@ import ru.practicum.shareit.user.model.User;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
 @Service
 @Slf4j
 @Qualifier("ItemServiceImpl")
@@ -38,6 +39,7 @@ public class ItemServiceImpl implements ItemService {
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
     }
+
     @Override
     @Transactional
     public CommentDto addComment(CommentDto commentDto, Integer userId, Integer itemId) {
@@ -97,6 +99,7 @@ public class ItemServiceImpl implements ItemService {
         log.info("ItemServiceImpl->getUserItems end");
         return itemOwnerDtoResult;
     }
+
     @Override
     @Transactional
     public ItemDto createItem(ItemDtoNew newItemRequestDto, Integer userId) {
@@ -155,6 +158,7 @@ public class ItemServiceImpl implements ItemService {
         log.info("ItemServiceImpl->getByIdItem end");
         return itemDto;
     }
+
     @Override
     public List<ItemDto> searchItem(String text) {
         log.info("ItemServiceImpl->searchItem start");
