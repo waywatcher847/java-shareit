@@ -8,11 +8,12 @@ import lombok.NoArgsConstructor;
 /**
  * TODO Sprint add-controllers.
  */
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class UserDto {
     private Integer id;
     private String name;
     private String email;
