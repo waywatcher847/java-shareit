@@ -7,9 +7,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class ShareItTests {
 
-	@Test
+    @Test
     @Disabled
-	void contextLoads() {
-	}
+    void contextLoads() {
+    }
 
 }
