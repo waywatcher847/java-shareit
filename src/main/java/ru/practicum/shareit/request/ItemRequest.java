@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @ToString
 @Builder
 @Table(name = "requests")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) //******!!!!
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ItemRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

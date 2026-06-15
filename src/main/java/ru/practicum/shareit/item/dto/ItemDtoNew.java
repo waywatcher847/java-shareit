@@ -24,5 +24,4 @@ public class ItemDtoNew {
     @NotNull
     private Boolean available;
 
-    private Integer request;
 }

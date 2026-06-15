@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+
 @Slf4j
 @Service
 @Transactional(readOnly = true)
@@ -77,7 +78,7 @@ public class BookingServiceImpl implements BookingService {
 
         Booking savedBooking = bookingRepository.save(booking);
         log.info("BookingServiceImpl->createBooking end");
-        return mapToBookingDto(savedBooking);
+        return BookingMapper.mapToBookingDto(savedBooking);
     }
 
     @Override
@@ -126,7 +127,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         log.info("BookingServiceImpl->setBookingApproval end");
-        return mapToBookingDto(booking);
+        return BookingMapper.mapToBookingDto(booking);
     }
 
     @Override
@@ -145,7 +146,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         log.info("BookingServiceImpl->getBooking end");
-        return mapToBookingDto(booking);
+        return BookingMapper.mapToBookingDto(booking);
     }
 
     @Override
@@ -160,7 +161,7 @@ public class BookingServiceImpl implements BookingService {
         log.info("BookingServiceImpl->getAllBookings end");
         return bookings.stream()
                 .filter(Objects::nonNull)
-                .map(BookingServiceImpl::mapToBookingDto)
+                .map(BookingMapper::mapToBookingDto)
                 .toList();
     }
 
@@ -176,7 +177,7 @@ public class BookingServiceImpl implements BookingService {
         log.info("BookingServiceImpl->getBookingsByOwner end");
         return bookings.stream()
                 .filter(Objects::nonNull)
-                .map(BookingServiceImpl::mapToBookingDto)
+                .map(BookingMapper::mapToBookingDto)
                 .toList();
     }
 
@@ -234,16 +235,5 @@ public class BookingServiceImpl implements BookingService {
                     : bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED, pageable);
             default -> List.of();
         };
-    }
-
-    public static BookingDto mapToBookingDto(Booking booking) {
-        return BookingDto.builder()
-                .id(booking.getId())
-                .start(booking.getStart())
-                .end(booking.getEnd())
-                .item(booking.getItem())
-                .booker(booking.getBooker())
-                .status(booking.getStatus())
-                .build();
     }
 }

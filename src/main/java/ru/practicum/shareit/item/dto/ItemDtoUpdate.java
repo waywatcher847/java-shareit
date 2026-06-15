@@ -18,7 +18,6 @@ public class ItemDtoUpdate {
     @Size(max = 200, message = "Description max length os 200")
     private String description;
     private Boolean available;
-    private Integer request;
 
     public boolean hasName() {
         return !(name == null || name.isBlank());

@@ -147,11 +147,11 @@ public class ItemServiceImpl implements ItemService {
                     .getBookingsByNext(itemIds, LocalDateTime.now(), BookingStatus.APPROVED);
 
             if (!bookingLasts.isEmpty()) {
-                itemDto.setLastBooking(bookingLasts.getFirst().getLastBooking());
+                itemDto.setLastBooking(BookingMapper.mapToBookingDto(bookingLasts.getFirst().getLastBooking()));
             }
 
             if (!bookingNexts.isEmpty()) {
-                itemDto.setNextBooking(bookingNexts.getFirst().getNextBooking());
+                itemDto.setNextBooking(BookingMapper.mapToBookingDto(bookingLasts.getFirst().getLastBooking()));
             }
         }
 
@@ -214,20 +214,20 @@ public class ItemServiceImpl implements ItemService {
             List<ItemDtoOwner> ownerDto,
             List<BookingLast> bookingLasts,
             List<BookingNext> bookingNexts) {
-        Map<Integer, LocalDateTime> bookingLastsMap = bookingLasts.stream()
+        Map<Integer, Booking> bookingLastsMap = bookingLasts.stream()
                 .filter(Objects::nonNull)
                 .collect(Collectors.toMap(BookingLast::getId, BookingLast::getLastBooking));
 
-        Map<Integer, LocalDateTime> bookingNextMap = bookingNexts.stream()
+        Map<Integer, Booking> bookingNextMap = bookingNexts.stream()
                 .filter(Objects::nonNull)
                 .collect(Collectors.toMap(BookingNext::getId, BookingNext::getNextBooking));
 
         for (ItemDtoOwner ownerDtoItem : ownerDto) {
             if (bookingLastsMap.containsKey(ownerDtoItem.getId())) {
-                ownerDtoItem.setLastBooking(bookingLastsMap.get(ownerDtoItem.getId()));
+                ownerDtoItem.setLastBooking(BookingMapper.mapToBookingDto(bookingLastsMap.get(ownerDtoItem.getId())));
             }
             if (bookingNextMap.containsKey(ownerDtoItem.getId())) {
-                ownerDtoItem.setNextBooking(bookingNextMap.get(ownerDtoItem.getId()));
+                ownerDtoItem.setNextBooking(BookingMapper.mapToBookingDto(bookingNextMap.get(ownerDtoItem.getId())));
             }
         }
         return ownerDto;

@@ -27,7 +27,7 @@ public class BookingDtoUpdate {
     private LocalDateTime end;
 
     @NotNull
-    private Integer item;
+    private Integer itemId;
 
     @AssertTrue(message = "Dates should be chronological")
     public boolean isValid() {
