@@ -4,10 +4,11 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoNew;
+import ru.practicum.shareit.item.dto.ItemDtoOwner;
 import ru.practicum.shareit.item.dto.ItemDtoUpdate;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.ItemRequest;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.model.User;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ItemMapper {
@@ -28,7 +29,8 @@ public class ItemMapper {
                 .description(newItemRequest.getDescription())
                 .available(newItemRequest.getAvailable())
                 .owner(new User())
-                .request(new ItemRequest()).build();
+                .request(new ItemRequest())
+                .build();
     }
 
     public static Item updateItemField(Item item, ItemDtoUpdate itemDto) {
@@ -44,5 +46,14 @@ public class ItemMapper {
             item.setAvailable(itemDto.getAvailable());
         }
         return item;
+    }
+
+    public static ItemDtoOwner mapToItemOwnerDto(Item item) {
+        return ItemDtoOwner.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .build();
     }
 }

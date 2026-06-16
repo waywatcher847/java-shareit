@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserDtoUpdate {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Long id;
+    private Integer id;
     private String name;
     @Email
     private String email;

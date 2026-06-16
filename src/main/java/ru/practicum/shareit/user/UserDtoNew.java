@@ -14,7 +14,7 @@ import org.hibernate.validator.constraints.NotBlank;
 @Builder
 public class UserDtoNew {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Long id;
+    private Integer id;
     @NotBlank(message = "name is mandatory")
     private String name;
     @Email

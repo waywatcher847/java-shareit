@@ -6,9 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 
+import ru.practicum.shareit.comment.CommentDto;
 import ru.practicum.shareit.constants.Constants;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoNew;
+import ru.practicum.shareit.item.dto.ItemDtoOwner;
 import ru.practicum.shareit.item.dto.ItemDtoUpdate;
 
 import java.util.List;
@@ -24,14 +26,14 @@ public class ItemController {
     private final ItemService itemService;
 
     @Autowired
-    public ItemController(@Qualifier("ItemServiceInMemory") ItemService itemService) {
+    public ItemController(@Qualifier("ItemServiceImpl") ItemService itemService) {
         this.itemService = itemService;
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getByIdItem(@PathVariable("itemId") Integer itemId) {
+    public ItemDto getByIdItem(@PathVariable("itemId") Integer itemId, @RequestHeader(Constants.USER_ID_HEADER) Integer  userId) {
         log.info("Get /items/" + itemId);
-        return itemService.getByIdItem(itemId);
+        return itemService.getByIdItem(itemId, userId);
     }
 
     @PostMapping
@@ -50,7 +52,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getUserItems(@RequestHeader(Constants.USER_ID_HEADER) Integer userId) {
+    public List<ItemDtoOwner> getUserItems(@RequestHeader(Constants.USER_ID_HEADER) Integer userId) {
         log.info("Get /items/" + userId);
         return itemService.getUserItems(userId);
     }
@@ -59,5 +61,13 @@ public class ItemController {
     public List<ItemDto> searchItem(@RequestParam(value = "text", required = false) String text) {
         log.info("Get /items/search/" + text);
         return itemService.searchItem(text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(@PathVariable("itemId") Integer itemId,
+                                 @RequestHeader(Constants.USER_ID_HEADER) Integer userId,
+                                 @Valid @RequestBody CommentDto commentDto) {
+        log.info("Post /items/" + itemId + "/comment");
+        return itemService.addComment(commentDto, userId, itemId);
     }
 }
