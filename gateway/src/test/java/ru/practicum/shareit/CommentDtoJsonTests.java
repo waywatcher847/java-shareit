@@ -28,7 +28,7 @@ public class CommentDtoJsonTests {
     }
 
     @Test
-    void CommentRequestDto_WhenTextIsInvalid_ReturnsValidationErrors() throws IOException {
+    void commentRequestDto_WhenTextIsInvalid_ReturnsValidationErrors() throws IOException {
 
         String invalidJson1 = """
                 {
@@ -76,7 +76,7 @@ public class CommentDtoJsonTests {
     }
 
     @Test
-    void CommentRequestDto_WhenValidJson_DeserializesSuccessfully() throws IOException {
+    void commentRequestDto_WhenValidJson_DeserializesSuccessfully() throws IOException {
         String validJson = """
                 {
                                         "text": "Text"

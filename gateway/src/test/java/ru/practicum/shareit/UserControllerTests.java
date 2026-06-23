@@ -31,7 +31,7 @@ public class UserControllerTests {
 
 
     @Test
-    void UserController_WhenNameIsNull_ReturnsBadRequest() throws Exception {
+    void userController_WhenNameIsNull_ReturnsBadRequest() throws Exception {
         UserDto userDto = new UserDto();
         userDto.setName(null);
         userDto.setEmail("email@email.ru");
@@ -43,7 +43,7 @@ public class UserControllerTests {
     }
 
     @Test
-    void UserController_WhenCreatingUser_ReturnsOkStatus() throws Exception {
+    void userController_WhenCreatingUser_ReturnsOkStatus() throws Exception {
         UserDto userDto = new UserDto();
         userDto.setName("Name");
         userDto.setEmail("email@email.ru");
@@ -63,7 +63,7 @@ public class UserControllerTests {
     }
 
     @Test
-    void UserController_WhenNameIsEmpty_ReturnsBadRequest() throws Exception {
+    void userController_WhenNameIsEmpty_ReturnsBadRequest() throws Exception {
         UserDto userDto = new UserDto();
         userDto.setName("");
         userDto.setEmail("email@email.ru");
@@ -75,7 +75,7 @@ public class UserControllerTests {
     }
 
     @Test
-    void UserController_WhenNameIsBlank_ReturnsBadRequest() throws Exception {
+    void userController_WhenNameIsBlank_ReturnsBadRequest() throws Exception {
         UserDto userDto = new UserDto();
         userDto.setName("    ");
         userDto.setEmail("email@email.ru");
@@ -87,7 +87,7 @@ public class UserControllerTests {
     }
 
     @Test
-    void UserController_WhenEmailIsBlank_ReturnsBadRequest() throws Exception {
+    void userController_WhenEmailIsBlank_ReturnsBadRequest() throws Exception {
         UserDto userDto = new UserDto();
         userDto.setName("Name");
         userDto.setEmail("    ");
@@ -99,7 +99,7 @@ public class UserControllerTests {
     }
 
     @Test
-    void UserController_WhenEmailIsNull_ReturnsBadRequest() throws Exception {
+    void userController_WhenEmailIsNull_ReturnsBadRequest() throws Exception {
         UserDto userDto = new UserDto();
         userDto.setName("Name");
         userDto.setEmail(null);
@@ -111,7 +111,7 @@ public class UserControllerTests {
     }
 
     @Test
-    void UserController_WhenEmailIsInvalid_ReturnsBadRequest() throws Exception {
+    void userController_WhenEmailIsInvalid_ReturnsBadRequest() throws Exception {
         UserDto userDto = new UserDto();
         userDto.setName("Name");
         userDto.setEmail("@email.ru");
@@ -141,7 +141,7 @@ public class UserControllerTests {
     }
 
     @Test
-    void UserController_WhenEmailIsEmpty_ReturnsBadRequest() throws Exception {
+    void userController_WhenEmailIsEmpty_ReturnsBadRequest() throws Exception {
         UserDto userDto = new UserDto();
         userDto.setName("Name");
         userDto.setEmail("");
@@ -153,7 +153,7 @@ public class UserControllerTests {
     }
 
     @Test
-    void UserController_WhenEditingUserWithBlankEmail_ReturnsBadRequest() throws Exception {
+    void userController_WhenEditingUserWithBlankEmail_ReturnsBadRequest() throws Exception {
         Integer userId = 1;
 
         UserDto userDto = new UserDto();
@@ -167,7 +167,7 @@ public class UserControllerTests {
     }
 
     @Test
-    void UserController_WhenEditingUser_ReturnsOkStatus() throws Exception {
+    void userController_WhenEditingUser_ReturnsOkStatus() throws Exception {
         Integer userId = 1;
 
         UserDto userDto = new UserDto();
@@ -189,7 +189,7 @@ public class UserControllerTests {
     }
 
     @Test
-    void UserController_WhenGettingUser_ReturnsOkStatus() throws Exception {
+    void userController_WhenGettingUser_ReturnsOkStatus() throws Exception {
         Integer userId = 1;
 
         mvc.perform(get("/users/{userId}", userId))
@@ -197,7 +197,7 @@ public class UserControllerTests {
     }
 
     @Test
-    void UserController_WhenEditingUserWithInvalidEmail_ReturnsBadRequest() throws Exception {
+    void userController_WhenEditingUserWithInvalidEmail_ReturnsBadRequest() throws Exception {
         Integer userId = 1;
 
         UserDto userDto = new UserDto();
@@ -229,7 +229,7 @@ public class UserControllerTests {
     }
 
     @Test
-    void UserController_WhenDeletingUser_ReturnsNoContentStatus() throws Exception {
+    void userController_WhenDeletingUser_ReturnsNoContentStatus() throws Exception {
         Integer userId = 1;
 
         mvc.perform(delete("/users/{userId}", userId))
@@ -237,7 +237,7 @@ public class UserControllerTests {
     }
 
     @Test
-    void UserController_WhenGettingUsers_ReturnsOkStatus() throws Exception {
+    void userController_WhenGettingUsers_ReturnsOkStatus() throws Exception {
         Integer userId = 1;
 
         mvc.perform(get("/users"))

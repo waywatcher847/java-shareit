@@ -32,7 +32,7 @@ public class BookingIntegrationalTests {
     private final ItemService itemService;
 
     @Test
-    void BookingService_WhenGettingNonExistentBooking_ThrowsNotFoundException() {
+    void bookingService_WhenGettingNonExistentBooking_ThrowsNotFoundException() {
         UserDto ownerDto = new UserDto();
         ownerDto.setName("Owner2");
         ownerDto.setEmail("owner2@email.ru");
@@ -66,7 +66,7 @@ public class BookingIntegrationalTests {
     }
 
     @Test
-    void BookingService_WhenValidRequest_CreatesAndRetrievesBooking() {
+    void bookingService_WhenValidRequest_CreatesAndRetrievesBooking() {
         UserDto ownerDto = new UserDto();
         ownerDto.setName("Owner1");
         ownerDto.setEmail("owner1@email.ru");
@@ -104,7 +104,7 @@ public class BookingIntegrationalTests {
     }
 
     @Test
-    void BookingService_WhenCreatingOrGettingWithInvalidData_ThrowsExceptions() {
+    void bookingService_WhenCreatingOrGettingWithInvalidData_ThrowsExceptions() {
         UserDto ownerDto = new UserDto();
         ownerDto.setName("Owner4");
         ownerDto.setEmail("owner4@email.ru");
@@ -171,7 +171,7 @@ public class BookingIntegrationalTests {
     }
 
     @Test
-    void BookingService_WhenGettingBookingByWrongUser_ThrowsValidationException() {
+    void bookingService_WhenGettingBookingByWrongUser_ThrowsValidationException() {
         UserDto ownerDto = new UserDto();
         ownerDto.setName("Owner3");
         ownerDto.setEmail("owner3@email.ru");

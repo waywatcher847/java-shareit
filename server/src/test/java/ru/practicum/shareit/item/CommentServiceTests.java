@@ -110,7 +110,7 @@ public class CommentServiceTests {
     }
 
     @Test
-    void ItemService_WhenAddingCommentWithNonExistentUser_ThrowsNotFoundException() {
+    void itemService_WhenAddingCommentWithNonExistentUser_ThrowsNotFoundException() {
         Integer authorId = 999;
         Integer itemId = 1;
         CommentRequestDto request = createCommentRequest("Great item!");
@@ -124,7 +124,7 @@ public class CommentServiceTests {
     }
 
     @Test
-    void ItemService_WhenAddingCommentWithValidData_ReturnsCommentDto() {
+    void itemService_WhenAddingCommentWithValidData_ReturnsCommentDto() {
         Integer authorId = 1;
         Integer itemId = 1;
         CommentRequestDto request = createCommentRequest("Great item!");
@@ -153,7 +153,7 @@ public class CommentServiceTests {
     }
 
     @Test
-    void ItemService_WhenAddingCommentWithNoApprovedBookings_ThrowsValidationException() {
+    void itemService_WhenAddingCommentWithNoApprovedBookings_ThrowsValidationException() {
         Integer authorId = 1;
         Integer itemId = 1;
         CommentRequestDto request = createCommentRequest("Great item!");
@@ -174,7 +174,7 @@ public class CommentServiceTests {
     }
 
     @Test
-    void ItemService_WhenAddingCommentWithNonExistentItem_ThrowsNotFoundException() {
+    void itemService_WhenAddingCommentWithNonExistentItem_ThrowsNotFoundException() {
         Integer authorId = 1;
         Integer itemId = 999;
         CommentRequestDto request = createCommentRequest("Great item!");
@@ -191,7 +191,7 @@ public class CommentServiceTests {
     }
 
     @Test
-    void ItemService_WhenAddingCommentWithEmptyText_ThrowsValidationException() {
+    void itemService_WhenAddingCommentWithEmptyText_ThrowsValidationException() {
         Integer authorId = 1;
         Integer itemId = 1;
         CommentRequestDto request = createCommentRequest("");
@@ -203,7 +203,7 @@ public class CommentServiceTests {
     }
 
     @Test
-    void ItemService_WhenAddingCommentWithActiveBooking_ThrowsValidationException() {
+    void itemService_WhenAddingCommentWithActiveBooking_ThrowsValidationException() {
         Integer authorId = 1;
         Integer itemId = 1;
         CommentRequestDto request = createCommentRequest("Great item!");

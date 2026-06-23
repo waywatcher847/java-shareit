@@ -28,7 +28,7 @@ public class ItemDtoJsonTests {
     }
 
     @Test
-    void ItemDto_WhenNameIsInvalid_ReturnsValidationErrors() throws IOException {
+    void itemDto_WhenNameIsInvalid_ReturnsValidationErrors() throws IOException {
         String invalidJson1 = """
                 {
                                         "description": "description",
@@ -84,7 +84,7 @@ public class ItemDtoJsonTests {
     }
 
     @Test
-    void ItemDto_WhenValidJson_DeserializesSuccessfully() throws IOException {
+    void itemDto_WhenValidJson_DeserializesSuccessfully() throws IOException {
         String validJson = """
                 {
                                         "name": "Item",
@@ -102,7 +102,7 @@ public class ItemDtoJsonTests {
     }
 
     @Test
-    void ItemDto_WhenAvailableIsInvalid_ReturnsValidationErrors() throws IOException {
+    void itemDto_WhenAvailableIsInvalid_ReturnsValidationErrors() throws IOException {
         String invalidJson1 = """
                 {
                                         "name": "Item",
@@ -122,7 +122,7 @@ public class ItemDtoJsonTests {
     }
 
     @Test
-    void ItemDto_WhendescriptionIsInvalid_ReturnsValidationErrors() throws IOException {
+    void itemDto_WhendescriptionIsInvalid_ReturnsValidationErrors() throws IOException {
         String invalidJson1 = """
                 {
                                         "name": "Item",

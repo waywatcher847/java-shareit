@@ -77,7 +77,7 @@ class BookingServiceTests {
     }
 
     @Test
-    void BookingService_WhenCreatingBookingWithNonExistentUser_ThrowsNotFoundException() {
+    void bookingService_WhenCreatingBookingWithNonExistentUser_ThrowsNotFoundException() {
         BookingRequestDto requestDto = new BookingRequestDto();
         requestDto.setItemId(1);
         requestDto.setStart(now.plusDays(1));
@@ -90,7 +90,7 @@ class BookingServiceTests {
     }
 
     @Test
-    void BookingService_WhenCreatingBookingWithNonExistentItem_ThrowsNotFoundException() {
+    void bookingService_WhenCreatingBookingWithNonExistentItem_ThrowsNotFoundException() {
         BookingRequestDto requestDto = new BookingRequestDto();
         requestDto.setItemId(99);
         requestDto.setStart(now.plusDays(1));
@@ -105,7 +105,7 @@ class BookingServiceTests {
     }
 
     @Test
-    void BookingService_WhenCreatingBookingWithUnavailableItem_ThrowsValidationException() {
+    void bookingService_WhenCreatingBookingWithUnavailableItem_ThrowsValidationException() {
         testItemDto.setAvailable(false);
         BookingRequestDto requestDto = new BookingRequestDto();
         requestDto.setItemId(1);
@@ -119,7 +119,7 @@ class BookingServiceTests {
     }
 
     @Test
-    void BookingService_WhenCreatingBookingForOwnItem_ThrowsValidationException() {
+    void bookingService_WhenCreatingBookingForOwnItem_ThrowsValidationException() {
         BookingRequestDto requestDto = new BookingRequestDto();
         requestDto.setItemId(1);
         requestDto.setStart(now.plusDays(1));
@@ -132,7 +132,7 @@ class BookingServiceTests {
     }
 
     @Test
-    void BookingService_WhenCreatingBookingWithValidData_ReturnsBookingDto() {
+    void bookingService_WhenCreatingBookingWithValidData_ReturnsBookingDto() {
         testItemDto.setUserId(2);
         BookingRequestDto requestDto = new BookingRequestDto();
         requestDto.setItemId(1);
@@ -158,7 +158,7 @@ class BookingServiceTests {
     }
 
     @Test
-    void BookingService_WhenCreatingBookingWithOverlappingDates_ThrowsValidationException() {
+    void bookingService_WhenCreatingBookingWithOverlappingDates_ThrowsValidationException() {
         testItemDto.setUserId(2);
         BookingRequestDto requestDto = new BookingRequestDto();
         requestDto.setItemId(1);
@@ -173,14 +173,14 @@ class BookingServiceTests {
     }
 
     @Test
-    void BookingService_WhenApprovingNonExistentBooking_ThrowsNotFoundException() {
+    void bookingService_WhenApprovingNonExistentBooking_ThrowsNotFoundException() {
         when(bookingRepository.findById(99)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> bookingService.approve(99, true, 1));
     }
 
     @Test
-    void BookingService_WhenApprovingBookingByNonOwner_ThrowsValidationException() {
+    void bookingService_WhenApprovingBookingByNonOwner_ThrowsValidationException() {
         testItemDto.setUserId(2);
         when(bookingRepository.findById(1)).thenReturn(Optional.of(testBooking));
         when(itemService.getItemById(1)).thenReturn(testItemDto);
@@ -189,7 +189,7 @@ class BookingServiceTests {
     }
 
     @Test
-    void BookingService_WhenApprovingAlreadyApprovedBooking_ThrowsValidationException() {
+    void bookingService_WhenApprovingAlreadyApprovedBooking_ThrowsValidationException() {
         testBooking.setStatus(BookingStatus.APPROVED);
         testItemDto.setUserId(1);
         when(bookingRepository.findById(1)).thenReturn(Optional.of(testBooking));
@@ -199,7 +199,7 @@ class BookingServiceTests {
     }
 
     @Test
-    void BookingService_WhenApprovingBooking_ReturnsApprovedBooking() {
+    void bookingService_WhenApprovingBooking_ReturnsApprovedBooking() {
         testItemDto.setUserId(1);
         when(bookingRepository.findById(1)).thenReturn(Optional.of(testBooking));
         when(itemService.getItemById(1)).thenReturn(testItemDto);
@@ -217,7 +217,7 @@ class BookingServiceTests {
     }
 
     @Test
-    void BookingService_WhenRejectingBooking_ReturnsRejectedBooking() {
+    void bookingService_WhenRejectingBooking_ReturnsRejectedBooking() {
         testItemDto.setUserId(1);
         when(bookingRepository.findById(1)).thenReturn(Optional.of(testBooking));
         when(itemService.getItemById(1)).thenReturn(testItemDto);
@@ -235,7 +235,7 @@ class BookingServiceTests {
     }
 
     @Test
-    void BookingService_WhenGettingNonExistentBookingById_ThrowsNotFoundException() {
+    void bookingService_WhenGettingNonExistentBookingById_ThrowsNotFoundException() {
         when(userService.getUserById(1)).thenReturn(testUserDto);
         when(bookingRepository.findById(99)).thenReturn(Optional.empty());
 
@@ -243,7 +243,7 @@ class BookingServiceTests {
     }
 
     @Test
-    void BookingService_WhenGettingBookingByIdAsBooker_ReturnsBooking() {
+    void bookingService_WhenGettingBookingByIdAsBooker_ReturnsBooking() {
         when(userService.getUserById(1)).thenReturn(testUserDto);
         when(bookingRepository.findById(1)).thenReturn(Optional.of(testBooking));
         when(itemService.getItemById(1)).thenReturn(testItemDto);
@@ -256,14 +256,14 @@ class BookingServiceTests {
     }
 
     @Test
-    void BookingService_WhenGettingBookingsForNonExistentUser_ThrowsNotFoundException() {
+    void bookingService_WhenGettingBookingsForNonExistentUser_ThrowsNotFoundException() {
         when(userService.getUserById(99)).thenThrow(new NotFoundException("User not found"));
 
         assertThrows(NotFoundException.class, () -> bookingService.getUserBookings(99, "ALL", 0, 10));
     }
 
     @Test
-    void BookingService_WhenGettingUserBookingsWithStateAll_ReturnsAllBookings() {
+    void bookingService_WhenGettingUserBookingsWithStateAll_ReturnsAllBookings() {
         when(userService.getUserById(1)).thenReturn(testUserDto);
         when(bookingRepository.findByUserIdOrderByStartDateDesc(eq(1), any(Pageable.class))).thenReturn(List.of(testBooking));
         when(itemService.getItemById(1)).thenReturn(testItemDto);
@@ -277,7 +277,7 @@ class BookingServiceTests {
     }
 
     @Test
-    void BookingService_WhenGettingUserBookingsWithStateWaiting_ReturnsWaitingBookings() {
+    void bookingService_WhenGettingUserBookingsWithStateWaiting_ReturnsWaitingBookings() {
         when(userService.getUserById(1)).thenReturn(testUserDto);
         when(bookingRepository.findByUserIdAndStatusOrderByStartDateDesc(eq(1), eq(BookingStatus.WAITING), any(Pageable.class))).thenReturn(List.of(testBooking));
         when(itemService.getItemById(1)).thenReturn(testItemDto);
@@ -290,7 +290,7 @@ class BookingServiceTests {
     }
 
     @Test
-    void BookingService_WhenGettingUserBookingsWithStateCurrent_ReturnsCurrentBookings() {
+    void bookingService_WhenGettingUserBookingsWithStateCurrent_ReturnsCurrentBookings() {
         when(userService.getUserById(1)).thenReturn(testUserDto);
         when(bookingRepository.findCurrentByBookerId(eq(1), any(LocalDateTime.class), any(Pageable.class))).thenReturn(List.of(testBooking));
         when(itemService.getItemById(1)).thenReturn(testItemDto);
@@ -302,7 +302,7 @@ class BookingServiceTests {
     }
 
     @Test
-    void BookingService_WhenGettingUserBookingsWithStatePast_ReturnsPastBookings() {
+    void bookingService_WhenGettingUserBookingsWithStatePast_ReturnsPastBookings() {
         when(userService.getUserById(1)).thenReturn(testUserDto);
         when(bookingRepository.findPastByBookerId(eq(1), any(LocalDateTime.class), any(Pageable.class))).thenReturn(List.of());
 
@@ -312,7 +312,7 @@ class BookingServiceTests {
     }
 
     @Test
-    void BookingService_WhenGettingUserBookingsWithStateFuture_ReturnsFutureBookings() {
+    void bookingService_WhenGettingUserBookingsWithStateFuture_ReturnsFutureBookings() {
         when(userService.getUserById(1)).thenReturn(testUserDto);
         when(bookingRepository.findFutureByBookerId(eq(1), any(LocalDateTime.class), any(Pageable.class))).thenReturn(List.of(testBooking));
         when(itemService.getItemById(1)).thenReturn(testItemDto);
@@ -324,14 +324,14 @@ class BookingServiceTests {
     }
 
     @Test
-    void BookingService_WhenGettingOwnerBookingsForNonExistentOwner_ThrowsNotFoundException() {
+    void bookingService_WhenGettingOwnerBookingsForNonExistentOwner_ThrowsNotFoundException() {
         when(userService.getUserById(99)).thenThrow(new NotFoundException("User not found"));
 
         assertThrows(NotFoundException.class, () -> bookingService.getOwnerBookings(99, "ALL", 0, 10));
     }
 
     @Test
-    void BookingService_WhenGettingOwnerBookingsWithStateAll_ReturnsAllOwnerBookings() {
+    void bookingService_WhenGettingOwnerBookingsWithStateAll_ReturnsAllOwnerBookings() {
         when(userService.getUserById(1)).thenReturn(testUserDto);
         when(bookingRepository.findByItemOwnerIdOrderByStartDesc(eq(1), any(Pageable.class))).thenReturn(List.of(testBooking));
         when(itemService.getItemById(1)).thenReturn(testItemDto);
@@ -343,7 +343,7 @@ class BookingServiceTests {
     }
 
     @Test
-    void BookingService_WhenGettingOwnerBookingsWithStateRejected_ReturnsRejectedOwnerBookings() {
+    void bookingService_WhenGettingOwnerBookingsWithStateRejected_ReturnsRejectedOwnerBookings() {
         when(userService.getUserById(1)).thenReturn(testUserDto);
         when(bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(eq(1), eq("REJECTED"), any(Pageable.class))).thenReturn(List.of());
 

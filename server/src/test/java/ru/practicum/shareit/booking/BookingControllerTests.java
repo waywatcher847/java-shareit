@@ -78,7 +78,7 @@ public class BookingControllerTests {
     }
 
     @Test
-    void BookingController_WhenCreatingBooking_ReturnsOkStatus() throws Exception {
+    void bookingController_WhenCreatingBooking_ReturnsOkStatus() throws Exception {
         Integer userId = 1;
 
         when(bookingService.create(any(BookingRequestDto.class), eq(userId)))
@@ -99,7 +99,7 @@ public class BookingControllerTests {
     }
 
     @Test
-    void BookingController_WhenGettingBooking_ReturnsOkStatus() throws Exception {
+    void bookingController_WhenGettingBooking_ReturnsOkStatus() throws Exception {
         Integer userId = 1;
         Integer bookingId = 1;
 
@@ -121,7 +121,7 @@ public class BookingControllerTests {
 
 
     @Test
-    void BookingController_WhenApprovingBooking_ReturnsOkStatus() throws Exception {
+    void bookingController_WhenApprovingBooking_ReturnsOkStatus() throws Exception {
         Integer userId = 1;
         Integer bookingId = 1;
         boolean state = true;
@@ -146,7 +146,7 @@ public class BookingControllerTests {
     }
 
     @Test
-    void BookingController_WhenGettingOwnersBookings_ReturnsOkStatus() throws Exception {
+    void bookingController_WhenGettingOwnersBookings_ReturnsOkStatus() throws Exception {
         Integer userId = 1;
         String state = "WAITING";
 
@@ -169,7 +169,7 @@ public class BookingControllerTests {
     }
 
     @Test
-    void BookingController_WhenGettingUsersBookings_ReturnsOkStatus() throws Exception {
+    void bookingController_WhenGettingUsersBookings_ReturnsOkStatus() throws Exception {
         Integer userId = 2;
         String state = "WAITING";
 

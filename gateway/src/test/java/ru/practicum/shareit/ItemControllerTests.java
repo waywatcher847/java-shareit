@@ -34,7 +34,7 @@ public class ItemControllerTests {
     private ItemClient itemClient;
 
     @Test
-    void ItemController_WhenCreatingItem_ReturnsOkStatus() throws Exception {
+    void itemController_WhenCreatingItem_ReturnsOkStatus() throws Exception {
         Integer userId = 1;
 
         ItemDto itemDto = new ItemDto();
@@ -59,7 +59,7 @@ public class ItemControllerTests {
     }
 
     @Test
-    void ItemController_WhenNameIsNull_ReturnsBadRequest() throws Exception {
+    void itemController_WhenNameIsNull_ReturnsBadRequest() throws Exception {
         ItemDto itemDto = new ItemDto();
         itemDto.setName(null);
         itemDto.setDescription("Description");
@@ -73,7 +73,7 @@ public class ItemControllerTests {
     }
 
     @Test
-    void ItemController_WhenNameIsBlank_ReturnsBadRequest() throws Exception {
+    void itemController_WhenNameIsBlank_ReturnsBadRequest() throws Exception {
         ItemDto itemDto = new ItemDto();
         itemDto.setName("      ");
         itemDto.setDescription("Description");
@@ -87,7 +87,7 @@ public class ItemControllerTests {
     }
 
     @Test
-    void ItemController_WhenDescriptionIsBlank_ReturnsBadRequest() throws Exception {
+    void itemController_WhenDescriptionIsBlank_ReturnsBadRequest() throws Exception {
         ItemDto itemDto = new ItemDto();
         itemDto.setName("Name");
         itemDto.setDescription("   ");
@@ -101,7 +101,7 @@ public class ItemControllerTests {
     }
 
     @Test
-    void ItemController_WhenNameIsEmpty_ReturnsBadRequest() throws Exception {
+    void itemController_WhenNameIsEmpty_ReturnsBadRequest() throws Exception {
         ItemDto itemDto = new ItemDto();
         itemDto.setName("");
         itemDto.setDescription("Description");
@@ -115,7 +115,7 @@ public class ItemControllerTests {
     }
 
     @Test
-    void ItemController_WhenDescriptionIsEmpty_ReturnsBadRequest() throws Exception {
+    void itemController_WhenDescriptionIsEmpty_ReturnsBadRequest() throws Exception {
         ItemDto itemDto = new ItemDto();
         itemDto.setName("Name");
         itemDto.setDescription("");
@@ -129,7 +129,7 @@ public class ItemControllerTests {
     }
 
     @Test
-    void ItemController_WhenDescriptionIsNull_ReturnsBadRequest() throws Exception {
+    void itemController_WhenDescriptionIsNull_ReturnsBadRequest() throws Exception {
         ItemDto itemDto = new ItemDto();
         itemDto.setName("Name");
         itemDto.setDescription(null);
@@ -143,7 +143,7 @@ public class ItemControllerTests {
     }
 
     @Test
-    void ItemController_WhenAvailableIsNull_ReturnsBadRequest() throws Exception {
+    void itemController_WhenAvailableIsNull_ReturnsBadRequest() throws Exception {
         ItemDto itemDto = new ItemDto();
         itemDto.setName("Name");
         itemDto.setDescription("Description");
@@ -157,7 +157,7 @@ public class ItemControllerTests {
     }
 
     @Test
-    void ItemController_WhenEditingItem_ReturnsOkStatus() throws Exception {
+    void itemController_WhenEditingItem_ReturnsOkStatus() throws Exception {
         Integer userId = 1;
         Integer itemId = 1;
 
@@ -188,21 +188,21 @@ public class ItemControllerTests {
     }
 
     @Test
-    void ItemController_WhenHeaderIsMissing_ReturnsBadRequest() throws Exception {
+    void itemController_WhenHeaderIsMissing_ReturnsBadRequest() throws Exception {
         mvc.perform(post("/items")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void ItemController_WhenGettingItems_ReturnsOkStatus() throws Exception {
+    void itemController_WhenGettingItems_ReturnsOkStatus() throws Exception {
         mvc.perform(get("/items")
                         .header("X-Sharer-User-Id", 1))
                 .andExpect(status().isOk());
     }
 
     @Test
-    void ItemController_WhenGettingItem_ReturnsOkStatus() throws Exception {
+    void itemController_WhenGettingItem_ReturnsOkStatus() throws Exception {
         Integer itemId = 1;
 
         mvc.perform(get("/items/{itemId}", itemId)
@@ -211,14 +211,14 @@ public class ItemControllerTests {
     }
 
     @Test
-    void ItemController_WhenSearchTextIsNull_ReturnsBadRequest() throws Exception {
+    void itemController_WhenSearchTextIsNull_ReturnsBadRequest() throws Exception {
         mvc.perform(get("/items/search")
                         .header("X-Sharer-User-Id", 1))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void ItemController_WhenSearchingItems_ReturnsOkStatus() throws Exception {
+    void itemController_WhenSearchingItems_ReturnsOkStatus() throws Exception {
         String searchingSubstring = "Item";
 
         mvc.perform(get("/items/search")
@@ -228,7 +228,7 @@ public class ItemControllerTests {
     }
 
     @Test
-    void ItemController_WhenSearchTextIsBlank_ReturnsBadRequest() throws Exception {
+    void itemController_WhenSearchTextIsBlank_ReturnsBadRequest() throws Exception {
         mvc.perform(get("/items/search")
                         .header("X-Sharer-User-Id", 1)
                         .param("text", "    "))
@@ -237,7 +237,7 @@ public class ItemControllerTests {
 
 
     @Test
-    void ItemController_WhenSearchTextIsEmpty_ReturnsBadRequest() throws Exception {
+    void itemController_WhenSearchTextIsEmpty_ReturnsBadRequest() throws Exception {
         mvc.perform(get("/items/search")
                         .header("X-Sharer-User-Id", 1)
                         .param("text", ""))
@@ -245,7 +245,7 @@ public class ItemControllerTests {
     }
 
     @Test
-    void ItemController_WhenCommentTextIsNull_ReturnsBadRequest() throws Exception {
+    void itemController_WhenCommentTextIsNull_ReturnsBadRequest() throws Exception {
         Integer itemId = 1;
 
         CommentRequestDto commentDto = new CommentRequestDto();
@@ -259,7 +259,7 @@ public class ItemControllerTests {
     }
 
     @Test
-    void ItemController_WhenCreatingComment_ReturnsOkStatus() throws Exception {
+    void itemController_WhenCreatingComment_ReturnsOkStatus() throws Exception {
         Integer authorId = 1;
         Integer itemId = 1;
 
@@ -281,7 +281,7 @@ public class ItemControllerTests {
     }
 
     @Test
-    void ItemController_WhenCommentTextIsEmpty_ReturnsBadRequest() throws Exception {
+    void itemController_WhenCommentTextIsEmpty_ReturnsBadRequest() throws Exception {
         Integer itemId = 1;
 
         CommentRequestDto commentDto = new CommentRequestDto();
@@ -295,7 +295,7 @@ public class ItemControllerTests {
     }
 
     @Test
-    void ItemController_WhenCommentTextIsBlank_ReturnsBadRequest() throws Exception {
+    void itemController_WhenCommentTextIsBlank_ReturnsBadRequest() throws Exception {
         Integer itemId = 1;
 
         CommentRequestDto commentDto = new CommentRequestDto();

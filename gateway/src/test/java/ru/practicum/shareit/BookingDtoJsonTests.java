@@ -29,7 +29,7 @@ public class BookingDtoJsonTests {
     }
 
     @Test
-    void BookingRequestDto_WhenValidJson_DeserializesSuccessfully() throws IOException {
+    void bookingRequestDto_WhenValidJson_DeserializesSuccessfully() throws IOException {
         String validJson = """
                 {
                                     "itemId": 111,
@@ -45,7 +45,7 @@ public class BookingDtoJsonTests {
     }
 
     @Test
-    void BookingRequestDto_WhenItemIdIsInvalid_ReturnsValidationErrors() throws IOException {
+    void bookingRequestDto_WhenItemIdIsInvalid_ReturnsValidationErrors() throws IOException {
         String invalidJson1 = """
                 {
                                         "start": "2222-12-25T10:00:00",
@@ -98,7 +98,7 @@ public class BookingDtoJsonTests {
     }
 
     @Test
-    void BookingRequestDto_WhenEndIsInvalid_ReturnsValidationErrors() throws IOException {
+    void bookingRequestDto_WhenEndIsInvalid_ReturnsValidationErrors() throws IOException {
         String invalidJson1 = """
                 {
                                         "itemId": 111,
@@ -117,7 +117,7 @@ public class BookingDtoJsonTests {
     }
 
     @Test
-    void BookingRequestDto_WhenStartIsAfterOrEqualToEnd_ReturnsValidationErrors() throws IOException {
+    void bookingRequestDto_WhenStartIsAfterOrEqualToEnd_ReturnsValidationErrors() throws IOException {
         String invalidJson1 = """
                 {
                                         "itemId": 111,
@@ -154,7 +154,7 @@ public class BookingDtoJsonTests {
     }
 
     @Test
-    void BookingRequestDto_WhenStartIsInvalid_ReturnsValidationErrors() throws IOException {
+    void bookingRequestDto_WhenStartIsInvalid_ReturnsValidationErrors() throws IOException {
         String invalidJson1 = """
                 {
                                         "itemId": 111,

@@ -33,7 +33,7 @@ public class ItemRequestControllerTests {
 
 
     @Test
-    void ItemRequestController_WhenDescriptionIsBlank_ReturnsBadRequest() throws Exception {
+    void itemRequestController_WhenDescriptionIsBlank_ReturnsBadRequest() throws Exception {
         ItemRequestDto itemRequestDto = new ItemRequestDto();
         itemRequestDto.setDescription("     ");
 
@@ -45,7 +45,7 @@ public class ItemRequestControllerTests {
     }
 
     @Test
-    void ItemRequestController_WhenCreatingItemRequest_ReturnsOkStatus() throws Exception {
+    void itemRequestController_WhenCreatingItemRequest_ReturnsOkStatus() throws Exception {
         Integer userId = 1;
 
         ItemRequestDto itemRequestDto = new ItemRequestDto();
@@ -64,7 +64,7 @@ public class ItemRequestControllerTests {
     }
 
     @Test
-    void ItemRequestController_WhenDescriptionIsEmpty_ReturnsBadRequest() throws Exception {
+    void itemRequestController_WhenDescriptionIsEmpty_ReturnsBadRequest() throws Exception {
         ItemRequestDto itemRequestDto = new ItemRequestDto();
         itemRequestDto.setDescription("");
 
@@ -76,7 +76,7 @@ public class ItemRequestControllerTests {
     }
 
     @Test
-    void ItemRequestController_WhenDescriptionIsNull_ReturnsBadRequest() throws Exception {
+    void itemRequestController_WhenDescriptionIsNull_ReturnsBadRequest() throws Exception {
         ItemRequestDto itemRequestDto = new ItemRequestDto();
         itemRequestDto.setDescription(null);
 
@@ -88,14 +88,14 @@ public class ItemRequestControllerTests {
     }
 
     @Test
-    void ItemRequestController_WhenGettingOwnItemRequests_ReturnsOkStatus() throws Exception {
+    void itemRequestController_WhenGettingOwnItemRequests_ReturnsOkStatus() throws Exception {
         mvc.perform(get("/requests")
                         .header("X-Sharer-User-Id", 1))
                 .andExpect(status().isOk());
     }
 
     @Test
-    void ItemRequestController_WhenHeaderIsMissing_ReturnsBadRequest() throws Exception {
+    void itemRequestController_WhenHeaderIsMissing_ReturnsBadRequest() throws Exception {
         ItemRequestDto itemRequestDto = new ItemRequestDto();
         itemRequestDto.setDescription("Description");
 
@@ -106,7 +106,7 @@ public class ItemRequestControllerTests {
     }
 
     @Test
-    void ItemRequestController_WhenGettingItemRequestById_ReturnsOkStatus() throws Exception {
+    void itemRequestController_WhenGettingItemRequestById_ReturnsOkStatus() throws Exception {
         Integer requestId = 1;
 
         mvc.perform(get("/requests/{requestId}", requestId)
@@ -115,7 +115,7 @@ public class ItemRequestControllerTests {
     }
 
     @Test
-    void ItemRequestController_WhenGettingAllItemRequests_ReturnsOkStatus() throws Exception {
+    void itemRequestController_WhenGettingAllItemRequests_ReturnsOkStatus() throws Exception {
         mvc.perform(get("/requests/all")
                         .header("X-Sharer-User-Id", 1))
                 .andExpect(status().isOk());

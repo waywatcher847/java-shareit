@@ -15,7 +15,6 @@ import ru.practicum.shareit.booking.BookingController;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -36,7 +35,7 @@ public class BookingControllerTests {
     private BookingClient bookingClient;
 
     @Test
-    void CreateBooking_NullItemId_ReturnsBadRequest() throws Exception {
+    void createBooking_NullItemId_ReturnsBadRequest() throws Exception {
 
         LocalDateTime now = LocalDateTime.now();
         BookingRequestDto bookingDto = new BookingRequestDto();
@@ -51,7 +50,7 @@ public class BookingControllerTests {
     }
 
     @Test
-    void CreateBooking_ValidRequest_ReturnsOk() throws Exception {
+    void createBooking_ValidRequest_ReturnsOk() throws Exception {
         Integer userId = 1;
 
         LocalDateTime now = LocalDateTime.now();
@@ -78,7 +77,7 @@ public class BookingControllerTests {
     }
 
     @Test
-    void CreateBooking_PastStartDate_ReturnsBadRequest() throws Exception {
+    void createBooking_PastStartDate_ReturnsBadRequest() throws Exception {
 
         LocalDateTime now = LocalDateTime.now();
         BookingRequestDto bookingDto = new BookingRequestDto();
@@ -94,7 +93,7 @@ public class BookingControllerTests {
     }
 
     @Test
-    void CreateBooking_NonPositiveItemId_ReturnsBadRequest() throws Exception {
+    void createBooking_NonPositiveItemId_ReturnsBadRequest() throws Exception {
 
         LocalDateTime now = LocalDateTime.now();
         BookingRequestDto bookingDtoWithZeroItemId = new BookingRequestDto();
@@ -121,7 +120,7 @@ public class BookingControllerTests {
     }
 
     @Test
-    void CreateBooking_NullEndDate_ReturnsBadRequest() throws Exception {
+    void createBooking_NullEndDate_ReturnsBadRequest() throws Exception {
 
         LocalDateTime now = LocalDateTime.now();
         BookingRequestDto bookingDto = new BookingRequestDto();
@@ -136,7 +135,7 @@ public class BookingControllerTests {
     }
 
     @Test
-    void CreateBooking_NullStartDate_ReturnsBadRequest() throws Exception {
+    void createBooking_NullStartDate_ReturnsBadRequest() throws Exception {
 
         LocalDateTime now = LocalDateTime.now();
         BookingRequestDto bookingDto = new BookingRequestDto();
@@ -152,7 +151,7 @@ public class BookingControllerTests {
 
 
     @Test
-    void CreateBooking_StartEqualsEnd_ReturnsBadRequest() throws Exception {
+    void createBooking_StartEqualsEnd_ReturnsBadRequest() throws Exception {
 
         LocalDateTime now = LocalDateTime.now();
         BookingRequestDto bookingDto = new BookingRequestDto();
@@ -169,7 +168,7 @@ public class BookingControllerTests {
 
 
     @Test
-    void CreateBooking_StartAfterEnd_ReturnsBadRequest() throws Exception {
+    void createBooking_StartAfterEnd_ReturnsBadRequest() throws Exception {
 
         LocalDateTime now = LocalDateTime.now();
         BookingRequestDto bookingDto = new BookingRequestDto();
@@ -206,7 +205,7 @@ public class BookingControllerTests {
     }
 
     @Test
-    void CreateBooking_MissingHeader_ReturnsBadRequest() throws Exception {
+    void createBooking_MissingHeader_ReturnsBadRequest() throws Exception {
         mvc.perform(post("/bookings")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
