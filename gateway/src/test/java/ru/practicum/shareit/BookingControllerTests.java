@@ -184,7 +184,7 @@ public class BookingControllerTests {
     }
 
     @Test
-    void GetBooking_ValidRequest_ReturnsOk() throws Exception {
+    void getBooking_ValidRequest_ReturnsOk() throws Exception {
         Integer bookingId = 1;
         boolean approved = true;
 
@@ -194,7 +194,7 @@ public class BookingControllerTests {
     }
 
     @Test
-    void ApproveBooking_ValidRequest_ReturnsOk() throws Exception {
+    void approveBooking_ValidRequest_ReturnsOk() throws Exception {
         Integer bookingId = 1;
         boolean approved = true;
 
@@ -212,7 +212,7 @@ public class BookingControllerTests {
     }
 
     @Test
-    void GetOwnersBookings_ValidRequest_ReturnsOk() throws Exception {
+    void getOwnersBookings_ValidRequest_ReturnsOk() throws Exception {
         Integer bookingId = 1;
 
         mvc.perform(get("/bookings/owner", bookingId)

@@ -37,13 +37,10 @@ public class CommentDtoJsonTests {
 
         CommentRequestDto commentDto1 = json.parseObject(invalidJson1);
 
-        Set<ConstraintViolation<CommentRequestDto>> violations1 =
-                validator.validate(commentDto1);
+        Set<ConstraintViolation<CommentRequestDto>> violations1 = validator.validate(commentDto1);
 
         assertThat(violations1).hasSize(1);
-        assertThat(violations1)
-                .extracting(ConstraintViolation::getMessage)
-                .contains("text is mandatory");
+        assertThat(violations1).extracting(ConstraintViolation::getMessage).contains("text is mandatory");
 
         String invalidJson2 = """
                 {
@@ -52,26 +49,20 @@ public class CommentDtoJsonTests {
 
         CommentRequestDto commentDto2 = json.parseObject(invalidJson2);
 
-        Set<ConstraintViolation<CommentRequestDto>> violations2 =
-                validator.validate(commentDto2);
+        Set<ConstraintViolation<CommentRequestDto>> violations2 = validator.validate(commentDto2);
 
         assertThat(violations2).hasSize(1);
-        assertThat(violations2)
-                .extracting(ConstraintViolation::getMessage)
-                .contains("text is mandatory");
+        assertThat(violations2).extracting(ConstraintViolation::getMessage).contains("text is mandatory");
 
         String invalidJson3 = """
                 {                    }""";
 
         CommentRequestDto commentDto3 = json.parseObject(invalidJson3);
 
-        Set<ConstraintViolation<CommentRequestDto>> violations3 =
-                validator.validate(commentDto3);
+        Set<ConstraintViolation<CommentRequestDto>> violations3 = validator.validate(commentDto3);
 
         assertThat(violations3).hasSize(1);
-        assertThat(violations3)
-                .extracting(ConstraintViolation::getMessage)
-                .contains("text is mandatory");
+        assertThat(violations3).extracting(ConstraintViolation::getMessage).contains("text is mandatory");
 
     }
 

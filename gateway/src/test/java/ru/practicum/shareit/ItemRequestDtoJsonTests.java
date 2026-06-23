@@ -37,13 +37,10 @@ public class ItemRequestDtoJsonTests {
 
         ItemRequestDto itemRequestDto1 = json.parseObject(invalidJson1);
 
-        Set<ConstraintViolation<ItemRequestDto>> violations1 =
-                validator.validate(itemRequestDto1);
+        Set<ConstraintViolation<ItemRequestDto>> violations1 = validator.validate(itemRequestDto1);
 
         assertThat(violations1).hasSize(1);
-        assertThat(violations1)
-                .extracting(ConstraintViolation::getMessage)
-                .contains("description is mandatory");
+        assertThat(violations1).extracting(ConstraintViolation::getMessage).contains("description is mandatory");
 
         String invalidJson2 = """
                 {
@@ -52,26 +49,19 @@ public class ItemRequestDtoJsonTests {
 
         ItemRequestDto itemRequestDto2 = json.parseObject(invalidJson2);
 
-        Set<ConstraintViolation<ItemRequestDto>> violations2 =
-                validator.validate(itemRequestDto2);
+        Set<ConstraintViolation<ItemRequestDto>> violations2 = validator.validate(itemRequestDto2);
 
         assertThat(violations2).hasSize(1);
-        assertThat(violations2)
-                .extracting(ConstraintViolation::getMessage)
-                .contains("description is mandatory");
+        assertThat(violations2).extracting(ConstraintViolation::getMessage).contains("description is mandatory");
 
-        String invalidJson3 = "{\n" +
-                "                    }";
+        String invalidJson3 = "{\n" + "                    }";
 
         ItemRequestDto itemRequestDto3 = json.parseObject(invalidJson3);
 
-        Set<ConstraintViolation<ItemRequestDto>> violations3 =
-                validator.validate(itemRequestDto3);
+        Set<ConstraintViolation<ItemRequestDto>> violations3 = validator.validate(itemRequestDto3);
 
         assertThat(violations3).hasSize(1);
-        assertThat(violations3)
-                .extracting(ConstraintViolation::getMessage)
-                .contains("description is mandatory");
+        assertThat(violations3).extracting(ConstraintViolation::getMessage).contains("description is mandatory");
     }
 
     @Test
