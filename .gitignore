@@ -38,3 +38,11 @@ build/
 /volumes/
 /src/
 /db/
+
+### Logs and Databases ###
+*.log
+*.db
+
+### Maven Wrapper ###
+mvnw
+mvnw.cmd
