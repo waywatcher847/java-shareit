@@ -21,9 +21,12 @@ public class UserDto {
 
     @NotNull(groups = Create.class, message = "Email is mandatory")
     @NotEmpty(groups = Create.class, message = "Email is mandatory")
-    @Email(groups = {Create.class, Edit.class},  message = "not a email")
+    @Email(groups = {Create.class, Edit.class}, message = "not a email")
     private String email;
 
-    public interface Create {}
-    public interface Edit {}
+    public interface Create {
+    }
+
+    public interface Edit {
+    }
 }
