@@ -236,7 +236,7 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new NotFoundException("Item with ID " + itemId + " not found"));
         log.info("Item found: {} (ID={})", item.getName(), item.getId());
 
-        LocalDateTime now = LocalDateTime.now().plusHours(3); //Сервер живет в прошлом
+        LocalDateTime now = LocalDateTime.now(); //Сервер живет в прошлом
         log.info("Current time: {}", now);
 
         List<Booking> approvedBookings = bookingRepository.findByUserIdAndItemIdAndStatus(
