@@ -148,4 +148,13 @@ class ItemRequestControllerTests {
         mockMvc.perform(get("/internal/requests/1"))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void getAllRequests_WhenInvalidFromType_ReturnsBadRequest() throws Exception {
+        mockMvc.perform(get("/internal/requests/all")
+                        .header("X-Sharer-User-Id", 1)
+                        .param("from", "invalid")
+                        .param("size", "10"))
+                .andExpect(status().isBadRequest());
+    }
 }

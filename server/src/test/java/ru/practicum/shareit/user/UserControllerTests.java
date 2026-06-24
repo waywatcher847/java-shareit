@@ -103,4 +103,17 @@ public class UserControllerTests {
                         .content("{}"))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void deleteUserById_WhenUserExists_ReturnsNoContent() throws Exception {
+        Integer userId = 1;
+        mockMvc.perform(delete("/internal/users/{userId}", userId))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void getUserById_WhenInvalidIdType_ReturnsBadRequest() throws Exception {
+        mockMvc.perform(get("/internal/users/{userId}", "invalid"))
+                .andExpect(status().isBadRequest());
+    }
 }

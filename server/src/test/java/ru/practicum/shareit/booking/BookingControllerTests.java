@@ -219,4 +219,18 @@ public class BookingControllerTests {
                         .content("{}"))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void bookingController_WhenInvalidBookingIdType_ReturnsBadRequest() throws Exception {
+        mvc.perform(get("/internal/bookings/{bookingId}", "invalid")
+                        .header("X-Sharer-User-Id", 1))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void bookingController_WhenInvalidUserIdType_ReturnsBadRequest() throws Exception {
+        mvc.perform(get("/internal/bookings")
+                        .header("X-Sharer-User-Id", "invalid"))
+                .andExpect(status().isBadRequest());
+    }
 }

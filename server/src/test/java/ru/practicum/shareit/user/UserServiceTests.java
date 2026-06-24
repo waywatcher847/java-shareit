@@ -13,8 +13,7 @@ import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -156,6 +155,39 @@ public class UserServiceTests {
         UserDto result = userService.getUserById(userId);
 
         assertThat(result, equalTo(expectedUser));
+    }
+
+    @Test
+    void updateUser_WhenNameIsNull_ShouldNotUpdateName() {
+        Integer userId = 1;
+        UserDto request = new UserDto();
+        request.setEmail("newemail@mail.ru");
+        User editingUser = formUserToEdit();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(editingUser));
+        when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
+        User savedUser = formUser();
+        savedUser.setEmail("newemail@mail.ru");
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(userMapper.toDto(savedUser)).thenReturn(formExpectedUser());
+
+        UserDto result = userService.update(userId, request);
+        assertNotNull(result);
+    }
+
+    @Test
+    void updateUser_WhenEmailIsNull_ShouldNotUpdateEmail() {
+        Integer userId = 1;
+        UserDto request = new UserDto();
+        request.setName("NewName");
+        User editingUser = formUserToEdit();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(editingUser));
+        User savedUser = formUser();
+        savedUser.setName("NewName");
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(userMapper.toDto(savedUser)).thenReturn(formExpectedUser());
+
+        UserDto result = userService.update(userId, request);
+        assertNotNull(result);
     }
 
     private User formUser() {

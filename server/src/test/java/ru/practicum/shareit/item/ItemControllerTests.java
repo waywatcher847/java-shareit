@@ -216,4 +216,20 @@ public class ItemControllerTests {
                         .header("X-Sharer-User-Id", 1))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void getItemById_WhenInvalidItemIdType_ReturnsBadRequest() throws Exception {
+        mvc.perform(get("/internal/items/{itemId}", "invalid")
+                        .header("X-Sharer-User-Id", 1))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateItem_WhenInvalidJson_ReturnsBadRequest() throws Exception {
+        mvc.perform(patch("/internal/items/{itemId}", 1)
+                        .header("X-Sharer-User-Id", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("invalid json"))
+                .andExpect(status().isBadRequest());
+    }
 }

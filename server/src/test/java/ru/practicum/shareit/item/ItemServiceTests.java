@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import ru.practicum.common.comment.CommentDto;
+import ru.practicum.common.comment.CommentRequestDto;
 import ru.practicum.common.item.ItemDto;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
@@ -325,5 +326,47 @@ public class ItemServiceTests {
     @Test
     void getItemById_WhenIdIsNull_ShouldThrowValidationException() {
         assertThrows(ValidationException.class, () -> itemService.getItemById(null));
+    }
+
+    @Test
+    void createItem_WhenUserIdIsNull_ShouldThrowValidationException() {
+        ItemDto request = createItemDto();
+        assertThrows(ValidationException.class, () -> itemService.create(request, null));
+    }
+
+    @Test
+    void createItem_WhenUserIdIsZero_ShouldThrowValidationException() {
+        ItemDto request = createItemDto();
+        assertThrows(ValidationException.class, () -> itemService.create(request, 0));
+    }
+
+    @Test
+    void updateItem_WhenItemIdIsNull_ShouldThrowValidationException() {
+        ItemDto request = createItemDto();
+        assertThrows(ValidationException.class, () -> itemService.update(null, request, 1));
+    }
+
+    @Test
+    void getItemByIdWithDetails_WhenUserIdIsNull_ShouldThrowValidationException() {
+        assertThrows(ValidationException.class, () -> itemService.getItemByIdWithDetails(1, null));
+    }
+
+    @Test
+    void getAllItemsByUser_WhenUserIdIsNull_ShouldThrowValidationException() {
+        assertThrows(ValidationException.class, () -> itemService.getAllItemsByUser(null));
+    }
+
+    @Test
+    void addComment_WhenCommentTextIsNull_ShouldThrowValidationException() {
+        CommentRequestDto request = new CommentRequestDto();
+        request.setText(null);
+        assertThrows(ValidationException.class, () -> itemService.addComment(1, 1, request));
+    }
+
+    @Test
+    void addComment_WhenCommentTextIsBlank_ShouldThrowValidationException() {
+        CommentRequestDto request = new CommentRequestDto();
+        request.setText("   ");
+        assertThrows(ValidationException.class, () -> itemService.addComment(1, 1, request));
     }
 }
