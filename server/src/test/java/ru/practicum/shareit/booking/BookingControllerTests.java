@@ -14,6 +14,12 @@ import ru.practicum.common.booking.BookingRequestDto;
 import ru.practicum.common.booking.BookingStatus;
 import ru.practicum.common.item.ItemDto;
 import ru.practicum.common.user.UserDto;
+import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.ItemService;
+import ru.practicum.shareit.request.ItemRequestMapper;
+import ru.practicum.shareit.request.ItemRequestService;
+import ru.practicum.shareit.user.UserMapper;
+import ru.practicum.shareit.user.UserService;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -36,6 +42,21 @@ public class BookingControllerTests {
 
     @MockBean
     private BookingService bookingService;
+    @MockBean
+    private ItemService itemService;
+    @MockBean
+    private UserService userService;
+    @MockBean
+    private ItemRequestService requestService;
+    @MockBean
+    private ItemMapper itemMapper;
+    @MockBean
+    private UserMapper userMapper;
+    @MockBean
+    private BookingMapper bookingMapper;
+    @MockBean
+    private ItemRequestMapper itemRequestMapper;
+
 
     private BookingRequestDto request;
     private BookingDto response;

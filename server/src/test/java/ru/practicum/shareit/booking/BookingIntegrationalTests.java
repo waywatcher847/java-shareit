@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
-@ActiveProfiles("test")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class BookingIntegrationalTests {
     private final BookingService bookingService;
