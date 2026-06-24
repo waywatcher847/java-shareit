@@ -30,10 +30,9 @@ public class ItemRequestDtoJsonTests {
     @Test
     void itemRequestDto_WhenDescriptionIsInvalid_ReturnsValidationErrors() throws IOException {
 
-        String invalidJson1 = """
-                {
-                                        "description": ""
-                                    }""";
+        String invalidJson1 = "{\n" +
+                "                        \"description\": \"     \"\n" +
+                "                    }";
 
         ItemRequestDto itemRequestDto1 = json.parseObject(invalidJson1);
 
@@ -42,10 +41,9 @@ public class ItemRequestDtoJsonTests {
         assertThat(violations1).hasSize(1);
         assertThat(violations1).extracting(ConstraintViolation::getMessage).contains("description is mandatory");
 
-        String invalidJson2 = """
-                {
-                                        "description": "     "
-                                    }""";
+        String invalidJson2 = "{\n" +
+                "                        \"description\": \"\"\n" +
+                "                    }";
 
         ItemRequestDto itemRequestDto2 = json.parseObject(invalidJson2);
 
@@ -54,7 +52,8 @@ public class ItemRequestDtoJsonTests {
         assertThat(violations2).hasSize(1);
         assertThat(violations2).extracting(ConstraintViolation::getMessage).contains("description is mandatory");
 
-        String invalidJson3 = "{\n" + "                    }";
+        String invalidJson3 =  "{\n" +
+                "                    }";
 
         ItemRequestDto itemRequestDto3 = json.parseObject(invalidJson3);
 
@@ -66,10 +65,9 @@ public class ItemRequestDtoJsonTests {
 
     @Test
     void itemRequestDto_WhenValidJson_DeserializesSuccessfully() throws IOException {
-        String validJson = """
-                {
-                                        "description": "Description"
-                                    }""";
+        String validJson = "{\n" +
+                "                        \"description\": \"Description\"\n" +
+                "                    }";
 
         ItemRequestDto itemRequestDto = json.parseObject(validJson);
 

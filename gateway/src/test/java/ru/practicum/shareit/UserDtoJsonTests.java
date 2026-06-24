@@ -27,12 +27,10 @@ public class UserDtoJsonTests {
 
     @Test
     void userDto_WhenValidJson_DeserializesSuccessfully() throws IOException {
-        String validJson = """
-                {
-                
-                                        "name": "Name",
-                                        "email": "email@email.ru"
-                                    }""";
+        String validJson = "{\n" +
+                "                        \"name\": \"Name\",\n" +
+                "                        \"email\": \"email@email.ru\"\n" +
+                "                    }";
 
         UserDto userDto = json.parseObject(validJson);
 

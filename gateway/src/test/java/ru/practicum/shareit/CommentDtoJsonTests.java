@@ -30,10 +30,9 @@ public class CommentDtoJsonTests {
     @Test
     void commentRequestDto_WhenTextIsInvalid_ReturnsValidationErrors() throws IOException {
 
-        String invalidJson1 = """
-                {
-                                        "text": ""
-                                    }""";
+        String invalidJson1 = "{\n" +
+                "                        \"text\": \"\"\n" +
+                "                    }";
 
         CommentRequestDto commentDto1 = json.parseObject(invalidJson1);
 
@@ -42,10 +41,9 @@ public class CommentDtoJsonTests {
         assertThat(violations1).hasSize(1);
         assertThat(violations1).extracting(ConstraintViolation::getMessage).contains("text is mandatory");
 
-        String invalidJson2 = """
-                {
-                                        "text": "     "
-                                    }""";
+        String invalidJson2 = "{\n" +
+                "                        \"text\": \"     \"\n" +
+                "                    }";
 
         CommentRequestDto commentDto2 = json.parseObject(invalidJson2);
 
@@ -54,8 +52,8 @@ public class CommentDtoJsonTests {
         assertThat(violations2).hasSize(1);
         assertThat(violations2).extracting(ConstraintViolation::getMessage).contains("text is mandatory");
 
-        String invalidJson3 = """
-                {                    }""";
+        String invalidJson3 = "{\n" +
+                "                    }";
 
         CommentRequestDto commentDto3 = json.parseObject(invalidJson3);
 
@@ -68,10 +66,9 @@ public class CommentDtoJsonTests {
 
     @Test
     void commentRequestDto_WhenValidJson_DeserializesSuccessfully() throws IOException {
-        String validJson = """
-                {
-                                        "text": "Text"
-                                    }""";
+        String validJson = "{\n" +
+                "                        \"text\": \"Text\"\n" +
+                "                    }";
 
         CommentRequestDto commentDto = json.parseObject(validJson);
 

@@ -30,12 +30,11 @@ public class BookingDtoJsonTests {
 
     @Test
     void bookingRequestDto_WhenValidJson_DeserializesSuccessfully() throws IOException {
-        String validJson = """
-                {
-                                    "itemId": 111,
-                                    "start": "2222-12-25T10:00:00",
-                                    "end": "2222-12-26T18:00:00"
-                                }""";
+        String validJson = "{\n" +
+                "                    \"itemId\": 111,\n" +
+                "                    \"start\": \"2222-12-25T10:00:00\",\n" +
+                "                    \"end\": \"2222-12-26T18:00:00\"\n" +
+                "                }";
 
         BookingRequestDto bookingDto = json.parseObject(validJson);
 
@@ -46,11 +45,10 @@ public class BookingDtoJsonTests {
 
     @Test
     void bookingRequestDto_WhenItemIdIsInvalid_ReturnsValidationErrors() throws IOException {
-        String invalidJson1 = """
-                {
-                                        "start": "2222-12-25T10:00:00",
-                                        "end": "2222-12-26T18:00:00"
-                                    }""";
+        String invalidJson1 = "{\n" +
+                "                        \"start\": \"2222-12-25T10:00:00\",\n" +
+                "                        \"end\": \"2222-12-26T18:00:00\"\n" +
+                "                    }";
 
         BookingRequestDto bookingDto1 = json.parseObject(invalidJson1);
 
@@ -62,12 +60,11 @@ public class BookingDtoJsonTests {
                 .extracting(ConstraintViolation::getMessage)
                 .contains("ID is mandatory");
 
-        String invalidJson2 = """
-                {
-                                        "itemId": 0,
-                                        "start": "2222-12-25T10:00:00",
-                                        "end": "2222-12-26T18:00:00"
-                                    }""";
+        String invalidJson2 = "{\n" +
+                "                        \"itemId\": 0,\n" +
+                "                        \"start\": \"2222-12-25T10:00:00\",\n" +
+                "                        \"end\": \"2222-12-26T18:00:00\"\n" +
+                "                    }";
 
         BookingRequestDto bookingDto2 = json.parseObject(invalidJson2);
 
@@ -79,12 +76,11 @@ public class BookingDtoJsonTests {
                 .extracting(ConstraintViolation::getMessage)
                 .contains("ID can't be negative");
 
-        String invalidJson3 = """
-                {
-                                        "itemId": -1,
-                                        "start": "2222-12-25T10:00:00",
-                                        "end": "2222-12-26T18:00:00"
-                                    }""";
+        String invalidJson3 = "{\n" +
+                "                        \"itemId\": -1,\n" +
+                "                        \"start\": \"2222-12-25T10:00:00\",\n" +
+                "                        \"end\": \"2222-12-26T18:00:00\"\n" +
+                "                    }";
 
         BookingRequestDto bookingDto3 = json.parseObject(invalidJson3);
 
@@ -99,11 +95,11 @@ public class BookingDtoJsonTests {
 
     @Test
     void bookingRequestDto_WhenEndIsInvalid_ReturnsValidationErrors() throws IOException {
-        String invalidJson1 = """
-                {
-                                        "itemId": 111,
-                                        "start": "2222-12-25T10:00:00"
-                                    }""";
+        String invalidJson1 = "{\n" +
+                "                        \"itemId\": 111,\n" +
+                "                        \"start\": \"2222-12-26T18:00:00\"\n" +
+                "                    }";
+
 
         BookingRequestDto bookingDto1 = json.parseObject(invalidJson1);
 
@@ -118,12 +114,11 @@ public class BookingDtoJsonTests {
 
     @Test
     void bookingRequestDto_WhenStartIsAfterOrEqualToEnd_ReturnsValidationErrors() throws IOException {
-        String invalidJson1 = """
-                {
-                                        "itemId": 111,
-                                        "start": "2222-12-25T10:00:00",
-                                        "end": "2222-12-25T10:00:00"
-                                    }""";
+        String invalidJson1 = "{\n" +
+                "                        \"itemId\": 111,\n" +
+                "                        \"start\": \"2222-12-25T10:00:00\",\n" +
+                "                        \"end\": \"2222-12-25T10:00:00\"\n" +
+                "                    }";
 
         BookingRequestDto bookingDto1 = json.parseObject(invalidJson1);
 
@@ -135,12 +130,11 @@ public class BookingDtoJsonTests {
                 .extracting(ConstraintViolation::getMessage)
                 .contains("Dates should be chronological");
 
-        String invalidJson2 = """
-                {
-                                        "itemId": 111,
-                                        "start": "2222-12-25T10:00:00",
-                                        "end": "2222-12-25T09:59:59"
-                                    }""";
+        String invalidJson2 = "{\n" +
+                "                        \"itemId\": 111,\n" +
+                "                        \"start\": \"2222-12-25T19:00:00\",\n" +
+                "                        \"end\": \"2222-12-25T10:00:00\"\n" +
+                "                    }";
 
         BookingRequestDto bookingDto2 = json.parseObject(invalidJson2);
 
@@ -155,11 +149,10 @@ public class BookingDtoJsonTests {
 
     @Test
     void bookingRequestDto_WhenStartIsInvalid_ReturnsValidationErrors() throws IOException {
-        String invalidJson1 = """
-                {
-                                        "itemId": 111,
-                                        "end": "2222-12-26T18:00:00"
-                                    }""";
+        String invalidJson1 = "{\n" +
+                "                        \"itemId\": 111,\n" +
+                "                        \"end\": \"2222-12-25T10:00:00\"\n" +
+                "                    }";
 
         BookingRequestDto bookingDto1 = json.parseObject(invalidJson1);
 
@@ -171,12 +164,11 @@ public class BookingDtoJsonTests {
                 .extracting(ConstraintViolation::getMessage)
                 .contains("startDate is mandatory");
 
-        String invalidJson2 = """
-                {
-                                        "itemId": 111,
-                                        "start": "2022-12-25T10:00:00",
-                                        "end": "2222-12-26T18:00:00"
-                                    }""";
+        String invalidJson2 = "{\n" +
+                "                        \"itemId\": 111,\n" +
+                "                        \"start\": \"2022-12-25T10:00:00\",\n" +
+                "                        \"end\": \"2222-12-25T09:59:59\"\n" +
+                "                    }";
 
         BookingRequestDto bookingDto2 = json.parseObject(invalidJson2);
 

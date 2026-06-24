@@ -29,12 +29,11 @@ public class ItemDtoJsonTests {
 
     @Test
     void itemDto_WhenNameIsInvalid_ReturnsValidationErrors() throws IOException {
-        String invalidJson1 = """
-                {
-                                        "description": "description",
-                                        "available": true,
-                                        "requestId": 111
-                                    }""";
+        String invalidJson1 = "{\n" +
+                "                        \"description\": \"description\",\n" +
+                "                        \"available\": true,\n" +
+                "                        \"requestId\": 111\n" +
+                "                    }";
 
         ItemDto itemDto1 = json.parseObject(invalidJson1);
 
@@ -46,13 +45,12 @@ public class ItemDtoJsonTests {
                 .extracting(ConstraintViolation::getMessage)
                 .contains("Name is mandatory");
 
-        String invalidJson2 = """
-                {
-                                        "name": "",
-                                        "description": "description",
-                                        "available": true,
-                                        "requestId": 111
-                                    }""";
+        String invalidJson2 = "{\n" +
+                "                        \"name\": \"     \",\n" +
+                "                        \"description\": \"description\",\n" +
+                "                        \"available\": true,\n" +
+                "                        \"requestId\": 111\n" +
+                "                    }";
 
         ItemDto itemDto2 = json.parseObject(invalidJson2);
 
@@ -64,13 +62,12 @@ public class ItemDtoJsonTests {
                 .extracting(ConstraintViolation::getMessage)
                 .contains("Name is mandatory");
 
-        String invalidJson3 = """
-                {
-                                        "name": "     ",
-                                        "description": "description",
-                                        "available": true,
-                                        "requestId": 111
-                                    }""";
+        String invalidJson3 = "{\n" +
+                "                        \"name\": \"     \",\n" +
+                "                        \"description\": \"description\",\n" +
+                "                        \"available\": true,\n" +
+                "                        \"requestId\": 111\n" +
+                "                    }";
 
         ItemDto itemDto3 = json.parseObject(invalidJson3);
 
@@ -85,13 +82,12 @@ public class ItemDtoJsonTests {
 
     @Test
     void itemDto_WhenValidJson_DeserializesSuccessfully() throws IOException {
-        String validJson = """
-                {
-                                        "name": "Item",
-                                        "description": "description",
-                                        "available": true,
-                                        "requestId": 111
-                                    }""";
+        String validJson = "{\n" +
+                "                        \"name\": \"Item\",\n" +
+                "                        \"description\": \"description\",\n" +
+                "                        \"available\": true,\n" +
+                "                        \"requestId\": 111\n" +
+                "                    }";
 
         ItemDto itemDto = json.parseObject(validJson);
 
@@ -103,12 +99,11 @@ public class ItemDtoJsonTests {
 
     @Test
     void itemDto_WhenAvailableIsInvalid_ReturnsValidationErrors() throws IOException {
-        String invalidJson1 = """
-                {
-                                        "name": "Item",
-                                        "description": "description",
-                                        "requestId": 111
-                                    }""";
+        String invalidJson1 = "{\n" +
+                "                        \"name\": \"Item\",\n" +
+                "                        \"description\": \"Description\",\n" +
+                "                        \"requestId\": 111\n" +
+                "                    }";
 
         ItemDto itemDto1 = json.parseObject(invalidJson1);
 
@@ -123,12 +118,11 @@ public class ItemDtoJsonTests {
 
     @Test
     void itemDto_WhendescriptionIsInvalid_ReturnsValidationErrors() throws IOException {
-        String invalidJson1 = """
-                {
-                                        "name": "Item",
-                                        "available": true,
-                                        "requestId": 111
-                                    }""";
+        String invalidJson1 = "{\n" +
+                "                        \"name\": \"Item\",\n" +
+                "                        \"available\": true,\n" +
+                "                        \"requestId\": 111\n" +
+                "                    }";
 
         ItemDto itemDto1 = json.parseObject(invalidJson1);
 
@@ -140,13 +134,13 @@ public class ItemDtoJsonTests {
                 .extracting(ConstraintViolation::getMessage)
                 .contains("description is mandatory");
 
-        String invalidJson2 = """
-                {
-                                        "name": "Item",
-                                        "description": "",
-                                        "available": true,
-                                        "requestId": 111
-                                    }""";
+        String invalidJson2 = "{\n" +
+                "                        \"name\": \"Item\",\n" +
+                "                        \"description\": \"     \",\n" +
+                "                        \"available\": true,\n" +
+                "                        \"requestId\": 111\n" +
+                "                    }";
+
 
         ItemDto itemDto2 = json.parseObject(invalidJson2);
 
@@ -158,13 +152,13 @@ public class ItemDtoJsonTests {
                 .extracting(ConstraintViolation::getMessage)
                 .contains("description is mandatory");
 
-        String invalidJson3 = """
-                {
-                                        "name": "Item",
-                                        "description": "     ",
-                                        "available": true,
-                                        "requestId": 111
-                                    }""";
+        String invalidJson3 = "{\n" +
+                "                        \"name\": \"Item\",\n" +
+                "                        \"description\": \"\",\n" +
+                "                        \"available\": true,\n" +
+                "                        \"requestId\": 111\n" +
+                "                    }";
+
 
         ItemDto itemDto3 = json.parseObject(invalidJson3);
 
