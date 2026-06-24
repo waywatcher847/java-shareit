@@ -438,8 +438,6 @@ public class BookingServiceTests {
         assertEquals("Unknown state: INVALID", exception.getMessage());
     }
 
-    // --- Helper Methods ---
-
     private void mockConvertToDtoList() {
         when(mapper.toDto(any(Booking.class))).thenReturn(new BookingDto());
         when(userService.getUserById(anyInt())).thenReturn(new UserDto());
