@@ -201,4 +201,19 @@ public class ItemControllerTests {
                 .andExpect(jsonPath("$.[0].description").value("Description"))
                 .andExpect(jsonPath("$.[0].available").value(true));
     }
+
+    @Test
+    void createItem_WhenHeaderIsMissing_ReturnsBadRequest() throws Exception {
+        mvc.perform(post("/internal/items")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void searchItems_WhenParamIsMissing_ReturnsBadRequest() throws Exception {
+        mvc.perform(get("/internal/items/search")
+                        .header("X-Sharer-User-Id", 1))
+                .andExpect(status().isBadRequest());
+    }
 }

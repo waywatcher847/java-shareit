@@ -17,17 +17,4 @@ public class ValidationTool {
         }
     }
 
-    public static void userCheck(User user, String level) {
-        log.info("userCheck start");
-        if (user.getName() == null || user.getName().isBlank()) {
-            log.warn("userCheck name bad");
-            throw new ValidationException(level + ": user name empty or null");
-        }
-
-        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            log.warn("userCheck email bad");
-            throw new ValidationException(level + ": email without @ or empty");
-        }
-        log.info("userCheck good");
-    }
 }

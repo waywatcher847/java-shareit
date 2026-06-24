@@ -11,6 +11,7 @@ import ru.practicum.common.item.ItemDto;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.item.comment.CommentMapper;
 import ru.practicum.shareit.item.comment.CommentRepository;
@@ -287,5 +288,41 @@ public class ItemServiceTests {
         List<ItemDto> result = itemService.getAllItemsByUser(userId);
 
         assertThat(result, equalTo(List.of(expectedItem)));
+    }
+    @Test
+    void createItem_WhenNameIsBlank_ShouldThrowValidationException() {
+        Integer userId = 1;
+        ItemDto request = createItemDto();
+        request.setName("");
+        when(userRepository.findById(userId)).thenReturn(Optional.of(createUser()));
+        assertThrows(ValidationException.class, () -> itemService.create(request, userId));
+    }
+
+    @Test
+    void createItem_WhenDescriptionIsBlank_ShouldThrowValidationException() {
+        Integer userId = 1;
+        ItemDto request = createItemDto();
+        request.setDescription("   ");
+        when(userRepository.findById(userId)).thenReturn(Optional.of(createUser()));
+        assertThrows(ValidationException.class, () -> itemService.create(request, userId));
+    }
+
+    @Test
+    void createItem_WhenAvailableIsNull_ShouldThrowValidationException() {
+        Integer userId = 1;
+        ItemDto request = createItemDto();
+        request.setAvailable(null);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(createUser()));
+        assertThrows(ValidationException.class, () -> itemService.create(request, userId));
+    }
+
+    @Test
+    void getItemById_WhenIdIsZero_ShouldThrowValidationException() {
+        assertThrows(ValidationException.class, () -> itemService.getItemById(0));
+    }
+
+    @Test
+    void getItemById_WhenIdIsNull_ShouldThrowValidationException() {
+        assertThrows(ValidationException.class, () -> itemService.getItemById(null));
     }
 }

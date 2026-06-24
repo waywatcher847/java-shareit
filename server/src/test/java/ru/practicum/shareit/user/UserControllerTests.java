@@ -87,4 +87,20 @@ public class UserControllerTests {
         mockMvc.perform(get("/internal/users/{userId}", userId))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void createUser_WhenInvalidJson_ReturnsBadRequest() throws Exception {
+        mockMvc.perform(post("/internal/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("invalid json string"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void updateUser_WhenInvalidIdType_ReturnsBadRequest() throws Exception {
+        mockMvc.perform(patch("/internal/users/{userId}", "not_a_number")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+    }
 }

@@ -351,4 +351,77 @@ class BookingServiceTests {
 
         assertNotNull(result);
     }
+
+    @Test
+    void bookingService_WhenCreatingBookingWithStartAfterEnd_ThrowsValidationException() {
+        BookingRequestDto requestDto = new BookingRequestDto();
+        requestDto.setItemId(1);
+        requestDto.setStart(now.plusDays(3));
+        requestDto.setEnd(now.plusDays(1));
+        assertThrows(ValidationException.class, () -> bookingService.create(requestDto, 1));
+    }
+
+    @Test
+    void bookingService_WhenCreatingBookingWithStartEqualsEnd_ThrowsValidationException() {
+        BookingRequestDto requestDto = new BookingRequestDto();
+        requestDto.setItemId(1);
+        requestDto.setStart(now.plusDays(1));
+        requestDto.setEnd(now.plusDays(1));
+        assertThrows(ValidationException.class, () -> bookingService.create(requestDto, 1));
+    }
+
+    @Test
+    void bookingService_WhenCreatingBookingWithStartInPast_ThrowsValidationException() {
+        BookingRequestDto requestDto = new BookingRequestDto();
+        requestDto.setItemId(1);
+        requestDto.setStart(now.minusDays(1));
+        requestDto.setEnd(now.plusDays(1));
+        assertThrows(ValidationException.class, () -> bookingService.create(requestDto, 1));
+    }
+
+    @Test
+    void bookingService_WhenCreatingBookingWithEndInPast_ThrowsValidationException() {
+        BookingRequestDto requestDto = new BookingRequestDto();
+        requestDto.setItemId(1);
+        requestDto.setStart(now.minusDays(2));
+        requestDto.setEnd(now.minusDays(1));
+        assertThrows(ValidationException.class, () -> bookingService.create(requestDto, 1));
+    }
+
+    @Test
+    void bookingService_WhenGettingUserBookingsWithNegativeFrom_ThrowsValidationException() {
+        when(userService.getUserById(1)).thenReturn(testUserDto);
+        assertThrows(ValidationException.class, () -> bookingService.getUserBookings(1, "ALL", -1, 10));
+    }
+
+    @Test
+    void bookingService_WhenGettingUserBookingsWithZeroSize_ThrowsValidationException() {
+        when(userService.getUserById(1)).thenReturn(testUserDto);
+        assertThrows(ValidationException.class, () -> bookingService.getUserBookings(1, "ALL", 0, 0));
+    }
+
+    @Test
+    void bookingService_WhenGettingUserBookingsWithUnknownState_ThrowsValidationException() {
+        when(userService.getUserById(1)).thenReturn(testUserDto);
+        assertThrows(ValidationException.class, () -> bookingService.getUserBookings(1, "UNKNOWN_STATE", 0, 10));
+    }
+
+    @Test
+    void bookingService_WhenGettingOwnerBookingsWithUnknownState_ThrowsValidationException() {
+        when(userService.getUserById(1)).thenReturn(testUserDto);
+        assertThrows(ValidationException.class, () -> bookingService.getOwnerBookings(1, "UNKNOWN_STATE", 0, 10));
+    }
+
+    @Test
+    void bookingService_WhenGettingUserBookingsWithStateRejected_ReturnsRejectedBookings() {
+        when(userService.getUserById(1)).thenReturn(testUserDto);
+        when(bookingRepository.findByUserIdAndStatusOrderByStartDateDesc(eq(1), eq(BookingStatus.REJECTED), any(Pageable.class)))
+                .thenReturn(List.of(testBooking));
+        when(itemService.getItemById(1)).thenReturn(testItemDto);
+        when(mapper.toDto(any(Booking.class))).thenReturn(expectedBookingDto);
+
+        List<BookingDto> result = bookingService.getUserBookings(1, "REJECTED", 0, 10);
+        assertNotNull(result);
+        verify(bookingRepository).findByUserIdAndStatusOrderByStartDateDesc(eq(1), eq(BookingStatus.REJECTED), any(Pageable.class));
+    }
 }
