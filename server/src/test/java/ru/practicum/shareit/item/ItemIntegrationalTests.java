@@ -16,6 +16,7 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.UserService;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -92,7 +93,7 @@ public class ItemIntegrationalTests {
     }
 
     @Test
-    void addComment_WhenUserHasApprovedBooking_ShouldAddComment() {
+    void addComment_WhenUserHasApprovedBooking_ShouldAddComment() throws InterruptedException {
         UserDto owner = new UserDto();
         owner.setName("Owner");
         owner.setEmail("owner@mail.ru");
@@ -112,8 +113,8 @@ public class ItemIntegrationalTests {
         ItemDto createdItem = itemService.create(item, ownerId);
         Integer itemId = createdItem.getId();
 
-        LocalDateTime start = LocalDateTime.now().plusHours(1);
-        LocalDateTime end = LocalDateTime.now().plusHours(2);
+        LocalDateTime start = LocalDateTime.now().plusSeconds(1);
+        LocalDateTime end = LocalDateTime.now().plusSeconds(2);;
 
         BookingRequestDto bookingRequest = new BookingRequestDto();
         bookingRequest.setItemId(itemId);
@@ -121,11 +122,13 @@ public class ItemIntegrationalTests {
         bookingRequest.setEnd(end);
 
         BookingDto createdBooking = bookingService.create(bookingRequest, bookerId);
+
         bookingService.approve(createdBooking.getId(), true, ownerId);
 
         CommentRequestDto commentRequest = new CommentRequestDto();
         commentRequest.setText("Great item!");
 
+        TimeUnit.SECONDS.sleep( 5 );
         CommentDto createdComment = itemService.addComment(bookerId, itemId, commentRequest);
 
         assertThat(createdComment.getText()).isEqualTo("Great item!");
