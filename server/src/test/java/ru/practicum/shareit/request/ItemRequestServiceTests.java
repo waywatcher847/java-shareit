@@ -50,8 +50,6 @@ public class ItemRequestServiceTests {
     private Item itemEntity;
     @Mock
     private ItemRequestDto itemRequestDto;
-    @Mock
-    private ItemResponseDto itemResponseDto;
 
     private static final Integer TEST_USER = 1;
     private static final Integer TEST_REQUEST = 10;
@@ -187,4 +185,175 @@ public class ItemRequestServiceTests {
         verify(itemRequestEntity).setCreated(any(LocalDateTime.class));
         verify(itemRequestRepository).save(itemRequestEntity);
     }
+
+
+    @Test
+    void createRequest() {
+        Integer userId = 2;
+        ItemRequestDto requestDto = new ItemRequestDto();
+        requestDto.setDescription("Description");
+
+        User user = new User();
+        user.setId(userId);
+        user.setName("Requestor");
+        user.setEmail("requestor@email.ru");
+
+        ItemRequest savedRequest = new ItemRequest();
+        savedRequest.setId(1);
+        savedRequest.setDescription("Description");
+        savedRequest.setUserId(userId);
+        savedRequest.setCreated(LocalDateTime.now());
+
+        ItemRequestDto expectedDto = new ItemRequestDto();
+        expectedDto.setId(1);
+        expectedDto.setDescription("Description");
+        expectedDto.setItems(List.of());
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(itemRequestMapper.toItemRequest(any(ItemRequestDto.class))).thenReturn(savedRequest);
+        when(itemRequestRepository.save(any(ItemRequest.class))).thenReturn(savedRequest);
+        when(itemRequestMapper.toItemRequestDtoWithItems(any(ItemRequest.class), any())).thenReturn(expectedDto);
+
+        ItemRequestDto result = itemRequestService.createRequest(userId, requestDto);
+
+        assertEquals(expectedDto, result);
+    }
+
+    @Test
+    void createRequestWithNotExistentUser() {
+        Integer userId = 999;
+        ItemRequestDto requestDto = new ItemRequestDto();
+        requestDto.setDescription("Description");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> itemRequestService.createRequest(userId, requestDto));
+
+        assertEquals("User not found!", exception.getMessage());
+    }
+
+    @Test
+    void getUserRequests() {
+        Integer userId = 2;
+        LocalDateTime created = LocalDateTime.now();
+
+        ItemRequest request = new ItemRequest();
+        request.setId(1);
+        request.setDescription("Description");
+        request.setUserId(userId);
+        request.setCreated(created);
+
+        Item item = new Item();
+        item.setId(1);
+        item.setName("Item");
+        item.setUserId(1);
+        item.setRequestId(1);
+
+        ItemResponseDto itemResponseDto = new ItemResponseDto(1, "Item", 1);
+        ItemRequestDto expectedDto = new ItemRequestDto();
+        expectedDto.setId(1);
+        expectedDto.setDescription("Description");
+        expectedDto.setItems(List.of(itemResponseDto));
+
+        when(itemRequestRepository.findByRequesterIdOrderByCreatedDesc(userId)).thenReturn(List.of(request));
+        when(itemRepository.findByRequestId(1)).thenReturn(List.of(item));
+        when(itemRequestMapper.toItemRequestDtoWithItems(any(ItemRequest.class), any())).thenReturn(expectedDto);
+
+        List<ItemRequestDto> result = itemRequestService.getUserRequests(userId);
+
+        assertEquals(1, result.size());
+        assertEquals(expectedDto, result.getFirst());
+    }
+
+    @Test
+    void getAllRequests() {
+        Integer userId = 2;
+        Integer from = 0;
+        Integer size = 10;
+        LocalDateTime created = LocalDateTime.now();
+
+        ItemRequest request = new ItemRequest();
+        request.setId(1);
+        request.setDescription("Description");
+        request.setUserId(userId);
+        request.setCreated(created);
+
+        Item item = new Item();
+        item.setId(1);
+        item.setName("Item");
+        item.setUserId(1);
+        item.setRequestId(1);
+
+        ItemResponseDto itemResponseDto = new ItemResponseDto(1, "Item", 1);
+        ItemRequestDto expectedDto = new ItemRequestDto();
+        expectedDto.setId(1);
+        expectedDto.setDescription("Description");
+        expectedDto.setItems(List.of(itemResponseDto));
+
+        when(itemRequestRepository.findByRequesterIdNotOrderByCreatedDesc(eq(userId), any(Pageable.class)))
+                .thenReturn(List.of(request));
+        when(itemRepository.findByRequestId(1)).thenReturn(List.of(item));
+        when(itemRequestMapper.toItemRequestDtoWithItems(any(ItemRequest.class), any())).thenReturn(expectedDto);
+
+        List<ItemRequestDto> result = itemRequestService.getAllRequests(userId, from, size);
+
+        assertEquals(1, result.size());
+        assertEquals(expectedDto, result.getFirst());
+    }
+
+    @Test
+    void getRequestById() {
+        Integer userId = 2;
+        Integer requestId = 1;
+        LocalDateTime created = LocalDateTime.now();
+
+        User user = new User();
+        user.setId(userId);
+
+        ItemRequest request = new ItemRequest();
+        request.setId(requestId);
+        request.setDescription("Description");
+        request.setUserId(userId);
+        request.setCreated(created);
+
+        Item item = new Item();
+        item.setId(1);
+        item.setName("Item");
+        item.setUserId(1);
+        item.setRequestId(requestId);
+
+        ItemResponseDto itemResponseDto = new ItemResponseDto(1, "Item", 1);
+        ItemRequestDto expectedDto = new ItemRequestDto();
+        expectedDto.setId(requestId);
+        expectedDto.setDescription("Description");
+        expectedDto.setItems(List.of(itemResponseDto));
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(itemRequestRepository.findById(requestId)).thenReturn(Optional.of(request));
+        when(itemRepository.findByRequestId(requestId)).thenReturn(List.of(item));
+        when(itemRequestMapper.toItemRequestDtoWithItems(any(ItemRequest.class), any())).thenReturn(expectedDto);
+
+        ItemRequestDto result = itemRequestService.getRequestById(userId, requestId);
+
+        assertEquals(expectedDto, result);
+    }
+
+    @Test
+    void getNotExistentRequest() {
+        Integer userId = 2;
+        Integer requestId = 999;
+
+        User user = new User();
+        user.setId(userId);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(itemRequestRepository.findById(requestId)).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> itemRequestService.getRequestById(userId, requestId));
+
+        assertEquals("Request not found", exception.getMessage());
+    }
+
 }
