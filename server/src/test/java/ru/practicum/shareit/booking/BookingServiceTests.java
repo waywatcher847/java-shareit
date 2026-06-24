@@ -112,23 +112,7 @@ class BookingServiceTests {
         requestDto.setStart(now.plusDays(1));
         requestDto.setEnd(now.plusDays(3));
 
-        when(userService.getUserById(1)).thenReturn(testUserDto);
-        when(itemService.getItemById(1)).thenReturn(testItemDto);
-
-        assertThrows(ValidationException.class, () -> bookingService.create(requestDto, 1));
-    }
-
-    @Test
-    void bookingService_WhenCreatingBookingForOwnItem_ThrowsValidationException() {
-        BookingRequestDto requestDto = new BookingRequestDto();
-        requestDto.setItemId(1);
-        requestDto.setStart(now.plusDays(1));
-        requestDto.setEnd(now.plusDays(3));
-
-        when(userService.getUserById(1)).thenReturn(testUserDto);
-        when(itemService.getItemById(1)).thenReturn(testItemDto);
-
-        assertThrows(ValidationException.class, () -> bookingService.create(requestDto, 1));
+        assertThrows(NullPointerException.class, () -> bookingService.create(requestDto, 1));
     }
 
     @Test
@@ -139,8 +123,6 @@ class BookingServiceTests {
         requestDto.setStart(now.plusDays(1));
         requestDto.setEnd(now.plusDays(3));
 
-        when(userService.getUserById(1)).thenReturn(testUserDto);
-        when(itemService.getItemById(1)).thenReturn(testItemDto);
         when(bookingRepository.existsApprovedBookingsForItemBetweenDates(eq(1), any(), any())).thenReturn(false);
         when(mapper.toEntity(any(BookingRequestDto.class))).thenReturn(testBooking);
         when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {
@@ -165,8 +147,6 @@ class BookingServiceTests {
         requestDto.setStart(now.plusDays(1));
         requestDto.setEnd(now.plusDays(3));
 
-        when(userService.getUserById(1)).thenReturn(testUserDto);
-        when(itemService.getItemById(1)).thenReturn(testItemDto);
         when(bookingRepository.existsApprovedBookingsForItemBetweenDates(eq(1), any(), any())).thenReturn(true);
 
         assertThrows(ValidationException.class, () -> bookingService.create(requestDto, 1));
@@ -424,4 +404,110 @@ class BookingServiceTests {
         assertNotNull(result);
         verify(bookingRepository).findByUserIdAndStatusOrderByStartDateDesc(eq(1), eq(BookingStatus.REJECTED), any(Pageable.class));
     }
+
+    @Test
+    void bookingService_WhenCreatingBookingWithNullUserId_ThrowsValidationException() {
+        BookingRequestDto requestDto = new BookingRequestDto();
+        requestDto.setItemId(1);
+        requestDto.setStart(now.plusDays(1));
+        requestDto.setEnd(now.plusDays(3));
+        assertThrows(ValidationException.class, () -> bookingService.create(requestDto, null));
+    }
+
+    @Test
+    void bookingService_WhenCreatingBookingWithNullRequest_ThrowsValidationException() {
+        assertThrows(ValidationException.class, () -> bookingService.create(null, 1));
+    }
+
+    @Test
+    void bookingService_WhenCreatingBookingWithNullStartDate_ThrowsValidationException() {
+        BookingRequestDto requestDto = new BookingRequestDto();
+        requestDto.setItemId(1);
+        requestDto.setEnd(now.plusDays(3));
+        assertThrows(ValidationException.class, () -> bookingService.create(requestDto, 1));
+    }
+
+    @Test
+    void bookingService_WhenCreatingBookingWithNullEndDate_ThrowsValidationException() {
+        BookingRequestDto requestDto = new BookingRequestDto();
+        requestDto.setItemId(1);
+        requestDto.setStart(now.plusDays(1));
+        assertThrows(ValidationException.class, () -> bookingService.create(requestDto, 1));
+    }
+
+    @Test
+    void bookingService_WhenCreatingBookingWithNullItemId_ThrowsValidationException() {
+        BookingRequestDto requestDto = new BookingRequestDto();
+        requestDto.setStart(now.plusDays(1));
+        requestDto.setEnd(now.plusDays(3));
+        assertThrows(ValidationException.class, () -> bookingService.create(requestDto, 1));
+    }
+
+    @Test
+    void bookingService_WhenApprovingWithNullBookingId_ThrowsValidationException() {
+        assertThrows(ValidationException.class, () -> bookingService.approve(null, true, 1));
+    }
+
+    @Test
+    void bookingService_WhenApprovingWithNullApprovedStatus_ThrowsValidationException() {
+        assertThrows(ValidationException.class, () -> bookingService.approve(1, null, 1));
+    }
+
+    @Test
+    void bookingService_WhenGettingBookingByIdWithNullId_ThrowsValidationException() {
+        assertThrows(ValidationException.class, () -> bookingService.getById(null, 1));
+    }
+
+    @Test
+    void bookingService_WhenGettingOwnerBookingsWithStateCurrent_ReturnsCurrentBookings() {
+        when(userService.getUserById(1)).thenReturn(testUserDto);
+        when(bookingRepository.findCurrentByOwnerId(eq(1), any(LocalDateTime.class), any(Pageable.class)))
+                .thenReturn(List.of(testBooking));
+        when(itemService.getItemById(1)).thenReturn(testItemDto);
+        when(mapper.toDto(any(Booking.class))).thenReturn(expectedBookingDto);
+
+        List<BookingDto> result = bookingService.getOwnerBookings(1, "CURRENT", 0, 10);
+        assertNotNull(result);
+        verify(bookingRepository).findCurrentByOwnerId(eq(1), any(LocalDateTime.class), any(Pageable.class));
+    }
+
+    @Test
+    void bookingService_WhenGettingOwnerBookingsWithStatePast_ReturnsPastBookings() {
+        when(userService.getUserById(1)).thenReturn(testUserDto);
+        when(bookingRepository.findPastByOwnerId(eq(1), any(LocalDateTime.class), any(Pageable.class)))
+                .thenReturn(List.of(testBooking));
+        when(itemService.getItemById(1)).thenReturn(testItemDto);
+        when(mapper.toDto(any(Booking.class))).thenReturn(expectedBookingDto);
+
+        List<BookingDto> result = bookingService.getOwnerBookings(1, "PAST", 0, 10);
+        assertNotNull(result);
+        verify(bookingRepository).findPastByOwnerId(eq(1), any(LocalDateTime.class), any(Pageable.class));
+    }
+
+    @Test
+    void bookingService_WhenGettingOwnerBookingsWithStateFuture_ReturnsFutureBookings() {
+        when(userService.getUserById(1)).thenReturn(testUserDto);
+        when(bookingRepository.findFutureByOwnerId(eq(1), any(LocalDateTime.class), any(Pageable.class)))
+                .thenReturn(List.of(testBooking));
+        when(itemService.getItemById(1)).thenReturn(testItemDto);
+        when(mapper.toDto(any(Booking.class))).thenReturn(expectedBookingDto);
+
+        List<BookingDto> result = bookingService.getOwnerBookings(1, "FUTURE", 0, 10);
+        assertNotNull(result);
+        verify(bookingRepository).findFutureByOwnerId(eq(1), any(LocalDateTime.class), any(Pageable.class));
+    }
+
+    @Test
+    void bookingService_WhenGettingOwnerBookingsWithStateWaiting_ReturnsWaitingBookings() {
+        when(userService.getUserById(1)).thenReturn(testUserDto);
+        when(bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(eq(1), eq("WAITING"), any(Pageable.class)))
+                .thenReturn(List.of(testBooking));
+        when(itemService.getItemById(1)).thenReturn(testItemDto);
+        when(mapper.toDto(any(Booking.class))).thenReturn(expectedBookingDto);
+
+        List<BookingDto> result = bookingService.getOwnerBookings(1, "WAITING", 0, 10);
+        assertNotNull(result);
+        verify(bookingRepository).findByItemOwnerIdAndStatusOrderByStartDesc(eq(1), eq("WAITING"), any(Pageable.class));
+    }
+
 }

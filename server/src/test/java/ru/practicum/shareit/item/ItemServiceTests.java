@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -369,4 +370,19 @@ public class ItemServiceTests {
         request.setText("   ");
         assertThrows(ValidationException.class, () -> itemService.addComment(1, 1, request));
     }
+
+    @Test
+    void searchItem_WhenTextIsBlank_ShouldReturnEmptyList() {
+        Integer userId = 1;
+        List<ItemDto> result = itemService.searchItem("   ", userId);
+        Assertions.assertTrue((result).isEmpty());
+    }
+
+    @Test
+    void searchItem_WhenTextIsNull_ShouldReturnEmptyList() {
+        Integer userId = 1;
+        List<ItemDto> result = itemService.searchItem(null, userId);
+        Assertions.assertTrue((result).isEmpty());
+    }
+
 }
