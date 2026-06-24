@@ -289,6 +289,7 @@ public class ItemServiceTests {
 
         assertThat(result, equalTo(List.of(expectedItem)));
     }
+
     @Test
     void createItem_WhenNameIsBlank_ShouldThrowValidationException() {
         Integer userId = 1;

@@ -211,6 +211,7 @@ public class BookingControllerTests {
                 .andExpect(jsonPath("$.[*].end").exists())
                 .andExpect(jsonPath("$.[*].status", Matchers.everyItem(is("WAITING"))));
     }
+
     @Test
     void bookingController_WhenHeaderIsMissing_ReturnsBadRequest() throws Exception {
         mvc.perform(post("/internal/bookings")

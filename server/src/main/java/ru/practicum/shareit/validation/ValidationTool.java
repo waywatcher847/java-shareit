@@ -2,7 +2,6 @@ package ru.practicum.shareit.validation;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.user.User;
 
 @Slf4j
 public class ValidationTool {
