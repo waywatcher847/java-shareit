@@ -30,12 +30,4 @@ public interface BookingMapper {
     @Mapping(target = "status", ignore = true)
     Booking toEntity(BookingRequestDto requestBookingDto);
 
-    List<BookingDto> toDtoList(List<Booking> bookings);
-
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "startDate", ignore = true)
-    @Mapping(target = "endDate", ignore = true)
-    @Mapping(target = "userId", ignore = true)
-    @Mapping(target = "itemId", ignore = true)
-    void updateBookingFromDto(BookingDto bookingDto, @MappingTarget Booking booking);
 }

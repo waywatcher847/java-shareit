@@ -23,11 +23,9 @@ public class Booking {
     @Column(name = "id")
     Integer id;
 
-    @FutureOrPresent(message = "Дата начала должна быть в настоящем или будущем")
     @Column(name = "start_date")
     LocalDateTime startDate;
 
-    @Future(message = "Дата окончания должна быть в будущем")
     @Column(name = "end_date")
     LocalDateTime endDate;
 

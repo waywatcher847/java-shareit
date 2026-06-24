@@ -87,19 +87,6 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
                                       @Param("now") LocalDateTime now,
                                       Pageable pageable);
 
-    ;
-
-    @Query(value = "SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END " +
-            "FROM bookings WHERE booker_id = :bookerId " +
-            "AND item_id = :itemId " +
-            "AND ended < :endDate " +
-            "AND status = 'APPROVED'",
-            nativeQuery = true)
-    boolean existsByBookerIdAndItemIdAndEndIsBefore(
-            @Param("bookerId") Integer bookerId,
-            @Param("itemId") Integer itemId,
-            @Param("endDate") LocalDateTime endDate);
-
     @Query(value = "SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END " +
             "FROM bookings WHERE item_id = :itemId " +
             "AND status = 'APPROVED' " +
