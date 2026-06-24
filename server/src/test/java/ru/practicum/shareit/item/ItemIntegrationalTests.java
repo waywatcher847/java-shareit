@@ -114,7 +114,8 @@ public class ItemIntegrationalTests {
         Integer itemId = createdItem.getId();
 
         LocalDateTime start = LocalDateTime.now().plusSeconds(1);
-        LocalDateTime end = LocalDateTime.now().plusSeconds(2);;
+        LocalDateTime end = LocalDateTime.now().plusSeconds(2);
+        ;
 
         BookingRequestDto bookingRequest = new BookingRequestDto();
         bookingRequest.setItemId(itemId);
@@ -128,7 +129,7 @@ public class ItemIntegrationalTests {
         CommentRequestDto commentRequest = new CommentRequestDto();
         commentRequest.setText("Great item!");
 
-        TimeUnit.SECONDS.sleep( 5 );
+        TimeUnit.SECONDS.sleep(5);
         CommentDto createdComment = itemService.addComment(bookerId, itemId, commentRequest);
 
         assertThat(createdComment.getText()).isEqualTo("Great item!");
