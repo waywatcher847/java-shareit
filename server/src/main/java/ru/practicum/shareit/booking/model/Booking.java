@@ -1,8 +1,6 @@
 package ru.practicum.shareit.booking.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.FutureOrPresent;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.common.booking.BookingStatus;

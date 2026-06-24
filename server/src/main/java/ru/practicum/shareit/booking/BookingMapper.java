@@ -5,8 +5,6 @@ import ru.practicum.common.booking.BookingDto;
 import ru.practicum.common.booking.BookingRequestDto;
 import ru.practicum.shareit.booking.model.Booking;
 
-import java.util.List;
-
 @Mapper(componentModel = "spring")
 public interface BookingMapper {
 
