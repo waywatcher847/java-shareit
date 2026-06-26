@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class BookingRequestDto {
+public class BookingDtoRequest {
 
     @NotNull(message = "ID is mandatory")
     @Positive(message = "ID can't be negative")

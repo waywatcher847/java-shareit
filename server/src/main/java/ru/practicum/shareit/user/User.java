@@ -6,8 +6,6 @@ import lombok.*;
 @Builder
 @Getter
 @Setter
-@ToString
-@EqualsAndHashCode(of = {"id"})
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -17,9 +15,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name")
     private String name;
 
-    @Column(name = "email", nullable = false)
+    @Column(name = "email")
     private String email;
 }

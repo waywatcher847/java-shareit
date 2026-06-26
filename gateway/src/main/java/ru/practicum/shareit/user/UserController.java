@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.common.user.UserDto;
+import ru.practicum.common.user.UserDtoNew;
 
 @Slf4j
 @RestController
@@ -19,36 +19,36 @@ public class UserController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> getUserDto(@PathVariable Integer id) {
-        log.info("Gateway: GET /users/{}", id);
+        log.info("GET /users/{}", id);
         return userClient.getUserDto(id);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> getUserList() {
-        log.info("Gateway: GET /users");
+        log.info("GET /users");
         return userClient.getUserList();
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<Object> create(@RequestBody @Validated(UserDto.Create.class) UserDto user) {
-        log.info("Gateway: POST /users");
+    public ResponseEntity<Object> create(@RequestBody @Validated(UserDtoNew.Create.class) UserDtoNew user) {
+        log.info("POST /users");
         return userClient.create(user);
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Object> update(@PathVariable Integer id,
-                                         @RequestBody @Validated(UserDto.Edit.class) UserDto user) {
-        log.info("Gateway: PATCH /users/{}", id);
+                                         @RequestBody @Validated(UserDtoNew.Edit.class) UserDtoNew user) {
+        log.info("PATCH /users/{}", id);
         return userClient.update(id, user);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Object> delete(@PathVariable Integer id) {
-        log.info("Gateway: DELETE /users/{}", id);
+        log.info("DELETE /users/{}", id);
         return userClient.delete(id);
     }
 }

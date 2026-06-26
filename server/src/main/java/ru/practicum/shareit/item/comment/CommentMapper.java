@@ -1,34 +1,34 @@
 package ru.practicum.shareit.item.comment;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import ru.practicum.common.comment.CommentDto;
-import ru.practicum.common.comment.CommentRequestDto;
-import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.common.comment.CommentDtoRequest;
+import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.user.User;
 
-@Mapper(componentModel = "spring", uses = {UserRepository.class})
-public interface CommentMapper {
+import java.time.LocalDateTime;
 
-    @Mapping(target = "authorName", source = "userId", qualifiedByName = "mapUserIdToName")
-    @Mapping(target = "itemId", source = "itemId")
-    @Mapping(target = "userId", source = "userId")
-    CommentDto toDto(Comment comment);
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class CommentMapper {
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "itemId", source = "itemId")
-    @Mapping(target = "userId", source = "userId")
-    @Mapping(target = "created", ignore = true)
-    Comment toEntity(CommentDto commentDto);
+    public static CommentDto toCommentDto(Comment comment) {
+        return CommentDto.builder()
+                .id(comment.getId())
+                .text(comment.getText())
+                .itemId(comment.getItem().getId())
+                .authorName(comment.getAuthor().getName())
+                .authorId(comment.getAuthor().getId())
+                .created(comment.getCreated())
+                .build();
+    }
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "itemId", ignore = true)
-    @Mapping(target = "userId", ignore = true)
-    @Mapping(target = "created", ignore = true)
-    Comment toEntity(CommentRequestDto commentRequestDto);
-
-    @Named("mapUserIdToName")
-    default String mapUserIdToName(Integer userId) {
-        return null;
+    public static Comment toComment(CommentDtoRequest commentDto, User author, Item item) {
+        return Comment.builder()
+                .text(commentDto.getText())
+                .author(author)
+                .item(item)
+                .created(LocalDateTime.now())
+                .build();
     }
 }

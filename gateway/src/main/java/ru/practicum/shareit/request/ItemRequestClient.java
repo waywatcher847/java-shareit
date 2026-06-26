@@ -12,8 +12,6 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.common.request.ItemRequestDto;
 import ru.practicum.shareit.client.BaseClient;
 
-import java.util.Map;
-
 @Slf4j
 @Service
 public class ItemRequestClient extends BaseClient {
@@ -40,13 +38,9 @@ public class ItemRequestClient extends BaseClient {
         return get("", userId);
     }
 
-    public ResponseEntity<Object> getAllRequests(Integer userId, Integer from, Integer size) {
-        log.info("Request getAllRequests ID={}, from {} to {}", userId, from, size);
-        Map<String, Object> parameters = Map.of(
-                "from", from,
-                "size", size
-        );
-        return get("/all", userId, parameters);
+    public ResponseEntity<Object> getAllRequests(Integer userId) {
+        log.info("Request getAllRequests ID={}", userId);
+        return get("/all", userId);
     }
 
     public ResponseEntity<Object> createRequest(Integer userId, @Valid ItemRequestDto itemRequestDto) {

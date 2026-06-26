@@ -1,25 +1,24 @@
 package ru.practicum.common.item;
-import lombok.*;
 
+import lombok.*;
 import ru.practicum.common.booking.BookingDto;
 import ru.practicum.common.comment.CommentDto;
-import ru.practicum.common.user.UserDto;
+import ru.practicum.common.request.ItemRequestDto;
 
 import java.util.List;
 
-@Builder
-@Getter
-@Setter
-@ToString
-@NoArgsConstructor
+@Data
 @AllArgsConstructor
-public class ItemDto {
+@NoArgsConstructor
+@EqualsAndHashCode(of = "id")
+@Builder
+public class ItemDtoOwner {
     private Integer id;
     private String name;
     private String description;
     private BookingDto lastBooking;
     private BookingDto nextBooking;
     private Boolean available;
-    private UserDto owner;
+    private ItemRequestDto request;
     private List<CommentDto> comments;
 }

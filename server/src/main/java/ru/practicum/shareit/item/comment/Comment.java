@@ -3,32 +3,37 @@ package ru.practicum.shareit.item.comment;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.user.User;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
-@Data
 @Entity
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "comments")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Comment {
-
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id;
+    private Integer id;
 
-    @Column(name = "text")
-    String text;
+    @Column(name = "text", nullable = false)
+    private String text;
 
-    @Column(name = "item_id")
-    Integer itemId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "item_id")
+    @ToString.Exclude
+    private Item item;
 
-    @Column(name = "user_id")
-    Integer userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    @ToString.Exclude
+    private User author;
 
     @Column(name = "created")
-    Instant created;
+    private LocalDateTime created;
 }

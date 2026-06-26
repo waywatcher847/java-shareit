@@ -1,10 +1,13 @@
 package ru.practicum.shareit.request;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.common.Constants;
 import ru.practicum.common.request.ItemRequestDto;
+import ru.practicum.common.request.ItemRequestDtoResponse;
 
 import java.util.List;
 
@@ -18,7 +21,7 @@ public class ItemRequestController {
 
     @GetMapping("/{requestId}")
     @ResponseStatus(HttpStatus.OK)
-    public ItemRequestDto getRequestById(@RequestHeader("X-Sharer-User-Id") Integer userId,
+    public ItemRequestDtoResponse getRequestById(@RequestHeader(Constants.USER_ID_HEADER) Integer userId,
                                          @PathVariable Integer requestId) {
         log.info("Server: GET /requests/{}, userId={}", requestId, userId);
         return requestService.getRequestById(userId, requestId);
@@ -26,25 +29,23 @@ public class ItemRequestController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ItemRequestDto> getUserRequests(@RequestHeader("X-Sharer-User-Id") Integer userId) {
+    public List<ItemRequestDtoResponse> getUserRequests(@RequestHeader(Constants.USER_ID_HEADER) Integer userId) {
         log.info("Server: GET /requests, userId={}", userId);
         return requestService.getUserRequests(userId);
     }
 
     @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
-    public List<ItemRequestDto> getAllRequests(
-            @RequestHeader("X-Sharer-User-Id") Integer userId,
-            @RequestParam(defaultValue = "0") Integer from,
-            @RequestParam(defaultValue = "10") Integer size) {
-        log.info("Server: GET /requests/all, userId={}, from={}, size={}", userId, from, size);
-        return requestService.getAllRequests(userId, from, size);
+    public List<ItemRequestDtoResponse> getAllRequests(
+            @RequestHeader(Constants.USER_ID_HEADER) Integer userId) {
+        log.info("Server: GET /requests/all, userId={}", userId);
+        return requestService.getAllRequests(userId);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemRequestDto createRequest(@RequestHeader("X-Sharer-User-Id") Integer userId,
-                                        @RequestBody ItemRequestDto itemRequestDto) {
+    public ItemRequestDtoResponse createRequest(@RequestHeader(Constants.USER_ID_HEADER) Integer userId,
+                                        @RequestBody @Valid ItemRequestDto itemRequestDto) {
         log.info("Server: POST /requests, userId={}, itemRequestDto={}", userId, itemRequestDto);
         return requestService.createRequest(userId, itemRequestDto);
     }

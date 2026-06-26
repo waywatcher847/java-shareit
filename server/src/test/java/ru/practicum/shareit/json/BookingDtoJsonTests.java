@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
-import ru.practicum.common.booking.BookingRequestDto;
+import ru.practicum.common.booking.BookingDtoRequest;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @JsonTest
 public class BookingDtoJsonTests {
     @Autowired
-    private JacksonTester<BookingRequestDto> json;
+    private JacksonTester<BookingDtoRequest> json;
 
     private final Validator validator;
 
@@ -36,7 +36,7 @@ public class BookingDtoJsonTests {
                 "                    \"end\": \"2222-12-26T18:00:00\"\n" +
                 "                }";
 
-        BookingRequestDto bookingDto = json.parseObject(validJson);
+        BookingDtoRequest bookingDto = json.parseObject(validJson);
 
         assertThat(bookingDto.getItemId()).isEqualTo(111);
         assertThat(bookingDto.getStart()).isEqualTo(LocalDateTime.of(2222, 12, 25, 10, 0, 0));
@@ -50,9 +50,9 @@ public class BookingDtoJsonTests {
                 "                        \"end\": \"2222-12-26T18:00:00\"\n" +
                 "                    }";
 
-        BookingRequestDto bookingDto1 = json.parseObject(invalidJson1);
+        BookingDtoRequest bookingDto1 = json.parseObject(invalidJson1);
 
-        Set<ConstraintViolation<BookingRequestDto>> violations1 =
+        Set<ConstraintViolation<BookingDtoRequest>> violations1 =
                 validator.validate(bookingDto1);
 
         assertThat(violations1).hasSize(1);
@@ -66,9 +66,9 @@ public class BookingDtoJsonTests {
                 "                        \"end\": \"2222-12-26T18:00:00\"\n" +
                 "                    }";
 
-        BookingRequestDto bookingDto2 = json.parseObject(invalidJson2);
+        BookingDtoRequest bookingDto2 = json.parseObject(invalidJson2);
 
-        Set<ConstraintViolation<BookingRequestDto>> violations2 =
+        Set<ConstraintViolation<BookingDtoRequest>> violations2 =
                 validator.validate(bookingDto2);
 
         assertThat(violations2).hasSize(1);
@@ -82,9 +82,9 @@ public class BookingDtoJsonTests {
                 "                        \"end\": \"2222-12-26T18:00:00\"\n" +
                 "                    }";
 
-        BookingRequestDto bookingDto3 = json.parseObject(invalidJson3);
+        BookingDtoRequest bookingDto3 = json.parseObject(invalidJson3);
 
-        Set<ConstraintViolation<BookingRequestDto>> violations3 =
+        Set<ConstraintViolation<BookingDtoRequest>> violations3 =
                 validator.validate(bookingDto3);
 
         assertThat(violations3).hasSize(1);
@@ -101,9 +101,9 @@ public class BookingDtoJsonTests {
                 "                    }";
 
 
-        BookingRequestDto bookingDto1 = json.parseObject(invalidJson1);
+        BookingDtoRequest bookingDto1 = json.parseObject(invalidJson1);
 
-        Set<ConstraintViolation<BookingRequestDto>> violations1 =
+        Set<ConstraintViolation<BookingDtoRequest>> violations1 =
                 validator.validate(bookingDto1);
 
         assertThat(violations1).hasSize(1);
@@ -120,9 +120,9 @@ public class BookingDtoJsonTests {
                 "                        \"end\": \"2222-12-25T10:00:00\"\n" +
                 "                    }";
 
-        BookingRequestDto bookingDto1 = json.parseObject(invalidJson1);
+        BookingDtoRequest bookingDto1 = json.parseObject(invalidJson1);
 
-        Set<ConstraintViolation<BookingRequestDto>> violations1 =
+        Set<ConstraintViolation<BookingDtoRequest>> violations1 =
                 validator.validate(bookingDto1);
 
         assertThat(violations1).hasSize(1);
@@ -136,9 +136,9 @@ public class BookingDtoJsonTests {
                 "                        \"end\": \"2222-12-25T10:00:00\"\n" +
                 "                    }";
 
-        BookingRequestDto bookingDto2 = json.parseObject(invalidJson2);
+        BookingDtoRequest bookingDto2 = json.parseObject(invalidJson2);
 
-        Set<ConstraintViolation<BookingRequestDto>> violations2 =
+        Set<ConstraintViolation<BookingDtoRequest>> violations2 =
                 validator.validate(bookingDto2);
 
         assertThat(violations2).hasSize(1);
@@ -154,9 +154,9 @@ public class BookingDtoJsonTests {
                 "                        \"end\": \"2222-12-25T10:00:00\"\n" +
                 "                    }";
 
-        BookingRequestDto bookingDto1 = json.parseObject(invalidJson1);
+        BookingDtoRequest bookingDto1 = json.parseObject(invalidJson1);
 
-        Set<ConstraintViolation<BookingRequestDto>> violations1 =
+        Set<ConstraintViolation<BookingDtoRequest>> violations1 =
                 validator.validate(bookingDto1);
 
         assertThat(violations1).hasSize(1);
@@ -170,9 +170,9 @@ public class BookingDtoJsonTests {
                 "                        \"end\": \"2222-12-25T09:59:59\"\n" +
                 "                    }";
 
-        BookingRequestDto bookingDto2 = json.parseObject(invalidJson2);
+        BookingDtoRequest bookingDto2 = json.parseObject(invalidJson2);
 
-        Set<ConstraintViolation<BookingRequestDto>> violations2 =
+        Set<ConstraintViolation<BookingDtoRequest>> violations2 =
                 validator.validate(bookingDto2);
 
         assertThat(violations2).hasSize(1);

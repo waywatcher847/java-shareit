@@ -1,9 +1,7 @@
-package ru.practicum.shareit.validation;
+package ru.practicum.shareit.exception;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -11,9 +9,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import ru.practicum.shareit.exception.InternalServerException;
-import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 
 @RestControllerAdvice
 public class ErrorHandler {
@@ -48,33 +43,21 @@ public class ErrorHandler {
         return new ErrorResponse("ERROR[400]: ValidationException", e.getMessage());
     }
 
-    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleHttpMediaTypeNotSupportedException(final HttpMediaTypeNotSupportedException e) {
-        return new ErrorResponse("ERROR[400]: HttpMediaTypeNotSupportedException", e.getMessage());
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse httpMessageNotReadableException(final HttpMessageNotReadableException e) {
-        return new ErrorResponse("ERROR[400]: HttpMessageNotReadableException", e.getMessage());
-    }
-
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse methodArgumentTypeMismatchException(final MethodArgumentTypeMismatchException e) {
+    public ErrorResponse handleMethodArgumentTypeMismatchException(final MethodArgumentTypeMismatchException e) {
         return new ErrorResponse("ERROR[400]: MethodArgumentTypeMismatchException", e.getMessage());
     }
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse notFoundException(final NotFoundException e) {
+    public ErrorResponse handleNotFoundException(final NotFoundException e) {
         return new ErrorResponse("ERROR[404]: NotFoundException", e.getMessage());
     }
 
     @ExceptionHandler(InternalServerException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse internalServerException(final InternalServerException e) {
+    public ErrorResponse handleInternalServerException(final InternalServerException e) {
         return new ErrorResponse("ERROR[500]: InternalServerException", e.getMessage());
     }
 
@@ -94,5 +77,17 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMissingServletRequestParameterException(final MissingServletRequestParameterException e) {
         return new ErrorResponse("ERROR[400]: Missing Request Parameter", e.getMessage());
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleConflictException(final ConflictException e) {
+        return new ErrorResponse("ERROR[409]: Conflict", e.getMessage());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleAccessDeniedException(final AccessDeniedException e) {
+        return new ErrorResponse("ERROR[403]: FORBIDDEN", e.getMessage());
     }
 }

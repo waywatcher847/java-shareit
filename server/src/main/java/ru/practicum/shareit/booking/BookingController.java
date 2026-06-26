@@ -6,8 +6,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.common.Constants;
 import ru.practicum.common.booking.BookingDto;
-import ru.practicum.common.booking.BookingRequestDto;
+import ru.practicum.common.booking.BookingDtoRequest;
+import ru.practicum.common.booking.BookingState;
 
 import java.util.List;
 
@@ -23,26 +25,26 @@ public class BookingController {
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<BookingDto> createBooking(
-            @RequestHeader("X-Sharer-User-Id") Integer userId,
-            @Valid @RequestBody BookingRequestDto bookingRequestDto) {
+            @RequestHeader(Constants.USER_ID_HEADER) Integer userId,
+            @Valid @RequestBody BookingDtoRequest bookingDtoRequest) {
         log.info("Server: POST /bookings");
-        return ResponseEntity.ok(bookingService.create(bookingRequestDto, userId));
+        return ResponseEntity.ok(bookingService.create(bookingDtoRequest, userId));
     }
 
     @PatchMapping("/{bookingId}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<BookingDto> approveBooking(
-            @RequestHeader("X-Sharer-User-Id") Integer userId,
+            @RequestHeader(Constants.USER_ID_HEADER) Integer userId,
             @PathVariable Integer bookingId,
             @RequestParam Boolean approved) {
         log.info("Server: PATCH /bookings/{}", bookingId);
-        return ResponseEntity.ok(bookingService.approve(bookingId, approved, userId));
+        return ResponseEntity.ok(bookingService.approve(bookingId, userId, approved));
     }
 
     @GetMapping("/{bookingId}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<BookingDto> getBookingById(
-            @RequestHeader("X-Sharer-User-Id") Integer userId,
+            @RequestHeader(Constants.USER_ID_HEADER) Integer userId,
             @PathVariable Integer bookingId) {
         log.info("Server: GET /bookings/{}", bookingId);
         return ResponseEntity.ok(bookingService.getById(bookingId, userId));
@@ -51,22 +53,18 @@ public class BookingController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<BookingDto>> getUserBookings(
-            @RequestHeader("X-Sharer-User-Id") Integer userId,
-            @RequestParam(defaultValue = "ALL") String state,
-            @RequestParam(defaultValue = "0") Integer from,
-            @RequestParam(defaultValue = "10") Integer size) {
+            @RequestHeader(Constants.USER_ID_HEADER) Integer userId,
+            @RequestParam(name = "state", defaultValue = Constants.DEFAULT_STATE) BookingState state) {
         log.info("Server: GET /bookings");
-        return ResponseEntity.ok(bookingService.getUserBookings(userId, state, from, size));
+        return ResponseEntity.ok(bookingService.getUserBookings(userId, state));
     }
 
     @GetMapping("/owner")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<BookingDto>> getOwnerBookings(
-            @RequestHeader("X-Sharer-User-Id") Integer ownerId,
-            @RequestParam(defaultValue = "ALL") String state,
-            @RequestParam(defaultValue = "0") Integer from,
-            @RequestParam(defaultValue = "10") Integer size) {
+            @RequestHeader(Constants.USER_ID_HEADER) Integer ownerId,
+            @RequestParam(name = "state", defaultValue = Constants.DEFAULT_STATE) BookingState state) {
         log.info("Server: GET /bookings/owner");
-        return ResponseEntity.ok(bookingService.getOwnerBookings(ownerId, state, from, size));
+        return ResponseEntity.ok(bookingService.getOwnerBookings(ownerId, state));
     }
 }

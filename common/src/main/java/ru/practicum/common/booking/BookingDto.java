@@ -1,23 +1,21 @@
 package ru.practicum.common.booking;
 
 import lombok.*;
-import lombok.experimental.FieldDefaults;
 import ru.practicum.common.item.ItemDto;
 import ru.practicum.common.user.UserDto;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
 public class BookingDto {
-
-    Integer id;
-    LocalDateTime start;
-    LocalDateTime end;
-    UserDto booker;
-    ItemDto item;
-    BookingStatus status;
+    private Integer id;
+    private LocalDateTime start;
+    private LocalDateTime end;
+    private ItemDto item;
+    private UserDto booker;
+    private BookingStatus status;
 }

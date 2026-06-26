@@ -1,31 +1,33 @@
 package ru.practicum.shareit.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
 
-@Data
 @Entity
 @Builder
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "requests")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ItemRequest {
 
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(name = "description")
     private String description;
 
-    @Column(name = "user_id")
-    private Integer userId;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    @ToString.Exclude
+    private User requestor;
 
     @Column(name = "created")
     private LocalDateTime created;

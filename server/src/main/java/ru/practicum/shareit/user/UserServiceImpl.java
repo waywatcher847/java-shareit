@@ -1,132 +1,93 @@
 package ru.practicum.shareit.user;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.common.user.UserDto;
-import ru.practicum.shareit.exception.InternalServerException;
-import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.common.user.UserDtoNew;
+import ru.practicum.shareit.exception.*;
+import java.util.*;
 
-@Slf4j
 @Service
-@RequiredArgsConstructor
+@Slf4j
+@Qualifier("UserServiceImpl")
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository repository;
-    private final UserMapper userMapper;
-    private static final String THIS_CLASS = "UserService";
+    private final UserRepository userRepository;
+
+    @Autowired
+    public UserServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
     @Transactional
-    public UserDto create(UserDto userDto) {
+    public UserDto create(UserDtoNew newUserRequestDto) {
         log.info("UserServiceImpl->create start");
-        log.info("userDto={}", userDto);
-
-        log.info("Creating user with email: {}", userDto.getEmail());
-
-        if (repository.findByEmail(userDto.getEmail()).isPresent()) {
-            log.warn("User with email {} already exists", userDto.getEmail());
-            throw new InternalServerException("User with email " + userDto.getEmail() + " already exists");
-        }
-
-        User user = userMapper.toEntity(userDto);
-
-        try {
-            User savedUser = repository.save(user);
-            log.info("User created with id: {}", savedUser.getId());
-            UserDto result = userMapper.toDto(savedUser);
-
-            log.info("UserServiceImpl->create end");
-            return result;
-        } catch (DataIntegrityViolationException e) {
-            log.error("Error saving user: {}", e.getMessage());
-            throw new InternalServerException("User with this email already exists");
-        }
+        validateEmail(newUserRequestDto.getEmail());
+        User userToSave = UserMapper.mapToUser(newUserRequestDto);
+        User savedUser = userRepository.save(userToSave);
+        log.info("UserServiceImpl->create end");
+        return UserMapper.mapToUserDto(savedUser);
     }
 
     @Override
     @Transactional
-    public UserDto update(Integer id, UserDto userDto) {
+    public void delete(Integer userId) {
+        log.info("UserServiceImpl->delete start");
+        userRepository.deleteById(userId);
+        log.info("UserServiceImpl->delete end");
+    }
+
+    @Override
+    public List<UserDto> getAll() {
+        log.info("UserServiceImpl->getAll start");
+        List<UserDto> users = userRepository.findAll().stream()
+                .filter(Objects::nonNull)
+                .map(UserMapper::mapToUserDto)
+                .toList();
+        log.info("UserServiceImpl->getAll end");
+        return users;
+    }
+
+    @Override
+    public UserDto getById(Integer userId) {
+        log.info("UserServiceImpl->getById start");
+        User user = userRepository.findById(userId).orElseThrow(() -> {
+            String error = String.format("User with ID: %d not found", userId);
+            log.warn(error);
+            return new NotFoundException(error);
+        });
+        log.info("UserServiceImpl->getById end");
+        return UserMapper.mapToUserDto(user);
+    }
+
+    @Override
+    @Transactional
+    public UserDto update(UserDtoNew updateUserRequestDto, Integer userId) {
         log.info("UserServiceImpl->update start");
-        log.info("id={}, userDto={}", id, userDto);
+        validateEmail(updateUserRequestDto.getEmail());
 
-        log.info("Updating user with id: {}", id);
+        User existingUser = userRepository.findById(userId).orElseThrow(() ->
+                new ValidationException("User with ID: " + userId + " not found")
+        );
 
-        if (userDto.getId() != null && !userDto.getId().equals(id)) {
-            log.warn("ID in request body {} =/= ID in path {}", userDto.getId(), id);
-            throw new InternalServerException("ID in request =/= ID in URL");
-        }
+        User updatedUser = UserMapper.updateUserField(existingUser, updateUserRequestDto);
+        User savedUser = userRepository.save(updatedUser);
 
-        User existingUser = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User with ID " + id + " not found"));
-
-        log.debug("Existing user: {}", existingUser);
-
-        if (userDto.getEmail() != null && !userDto.getEmail().equals(existingUser.getEmail())) {
-            log.debug("Checking email uniqueness: {}", userDto.getEmail());
-            repository.findByEmail(userDto.getEmail()).ifPresent(user -> {
-                if (!user.getId().equals(id)) {
-                    log.warn("Email {} is already used by user with id {}", userDto.getEmail(), user.getId());
-                    throw new InternalServerException("Email " + userDto.getEmail() + " is already used");
-                }
-            });
-        }
-        if (userDto.getName() != null) {
-            existingUser.setName(userDto.getName());
-        }
-        if (userDto.getEmail() != null) {
-            existingUser.setEmail(userDto.getEmail());
-        }
-
-        log.debug("Updated user before saving: {}", existingUser);
-
-        try {
-            User updatedUser = repository.save(existingUser);
-            log.info("User with id {} successfully updated", id);
-            UserDto result = userMapper.toDto(updatedUser);
-
-            log.info("UserServiceImpl->update end");
-            return result;
-        } catch (DataIntegrityViolationException e) {
-            log.error("Data integrity error while updating user: {}", e.getMessage());
-            throw new InternalServerException("Email already exists");
-        } catch (Exception e) {
-            log.error("Unexpected error while updating user: {}", e.getMessage(), e);
-            throw new InternalServerException("Error updating user: " + e.getMessage());
-        }
+        log.info("UserServiceImpl->update end");
+        return UserMapper.mapToUserDto(savedUser);
     }
 
-    @Override
-    public UserDto getUserById(Integer id) {
-        log.info("UserServiceImpl->getUserById start");
-        log.info("id={}", id);
-
-        log.info("Fetching user with id: {}", id);
-        User user = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User with ID " + id + " not found"));
-
-        UserDto result = userMapper.toDto(user);
-
-        log.info("UserServiceImpl->getUserById end");
-        return result;
-    }
-
-    @Override
-    @Transactional
-    public void deleteUserById(Integer id) {
-        log.info("UserServiceImpl->deleteUserById start");
-        log.info("id={}", id);
-
-        log.info("Deleting user with id: {}", id);
-        if (!repository.existsById(id)) {
-            throw new NotFoundException("User with ID " + id + " not found");
+    private void validateEmail(String email) {
+        Optional<User> existingUser = userRepository.findByEmailIgnoreCase(email);
+        if (existingUser.isPresent()) {
+            String error = String.format("Email: %s is already taken by another user", email);
+            log.warn(error);
+            throw new ConflictException(error);
         }
-        repository.deleteById(id);
-        log.info("User with id {} deleted", id);
-
-        log.info("UserServiceImpl->deleteUserById end");
     }
 }

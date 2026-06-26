@@ -1,21 +1,21 @@
 package ru.practicum.common.comment;
 
+import jakarta.validation.constraints.Size;
 import lombok.*;
-import lombok.experimental.FieldDefaults;
-
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class CommentDto {
+    private Integer id;
 
-    Integer id;
-    String text;
-    String authorName;
-    Integer itemId;
-    Integer userId;
-    Instant created;
+    @Size(max = 200, message = "max length os 200")
+    private String text;
+    private Integer itemId;
+    private String authorName;
+    private Integer authorId;
+    private LocalDateTime created;
 }

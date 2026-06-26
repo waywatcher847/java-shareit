@@ -4,36 +4,40 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.common.booking.BookingStatus;
+import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
 
-@Data
 @Entity
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 @Table(name = "bookings")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Booking {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    Integer id;
+    private Integer id;
 
     @Column(name = "start_date")
-    LocalDateTime startDate;
-
+    private LocalDateTime start;
     @Column(name = "end_date")
-    LocalDateTime endDate;
+    private LocalDateTime end;
 
-    @Column(name = "user_id")
-    Integer userId;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "item_id")
+    @ToString.Exclude
+    private Item item;
 
-    @Column(name = "item_id")
-    Integer itemId;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    @ToString.Exclude
+    private User booker;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    BookingStatus status;
+    private BookingStatus status;
 }

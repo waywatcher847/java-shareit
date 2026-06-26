@@ -1,185 +1,276 @@
 package ru.practicum.shareit.item;
 
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.common.booking.BookingDto;
-import ru.practicum.common.booking.BookingRequestDto;
-import ru.practicum.common.comment.CommentDto;
-import ru.practicum.common.comment.CommentRequestDto;
+import ru.practicum.common.booking.BookingStatus;
+import ru.practicum.common.comment.CommentDtoRequest;
 import ru.practicum.common.item.ItemDto;
-import ru.practicum.common.user.UserDto;
-import ru.practicum.shareit.booking.BookingService;
+import ru.practicum.common.item.ItemDtoOwner;
+import ru.practicum.common.item.ItemDtoRequest;
+import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.item.comment.Comment;
+import ru.practicum.shareit.item.comment.CommentRepository;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.ItemRequestRepository;
+import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @Transactional
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class ItemIntegrationalTests {
+class ItemIntegrationalTests {
+    @Autowired
+    private ItemService itemService;
 
-    private final ItemService itemService;
-    private final UserService userService;
-    private final BookingService bookingService;
+    @Autowired
+    private ItemRepository itemRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private BookingRepository bookingRepository;
+    @Autowired
+    private CommentRepository commentRepository;
+    @Autowired
+    private ItemRequestRepository itemRequestRepository;
 
     @Test
-    void updateItem_WhenCalledByOwner_ShouldUpdateItem() {
-        UserDto user = new UserDto();
-        user.setName("Name2");
-        user.setEmail("name2@mail.ru");
-        UserDto createdUser = userService.create(user);
-        Integer createdUserId = createdUser.getId();
+    void create_ValidItem_ReturnsSavedItem() {
+        User owner = createUser("Owner", "owner@test.com");
+        ItemDtoRequest request = ItemDtoRequest.builder()
+                .name("DDD")
+                .description("Powerful DDD")
+                .available(true)
+                .build();
 
-        ItemDto item = new ItemDto();
-        item.setName("Item2");
-        item.setDescription("Description2");
-        item.setAvailable(true);
-        ItemDto createdItem = itemService.create(item, createdUserId);
-        Integer createdItemId = createdItem.getId();
+        ItemDto result = itemService.create(request, owner.getId());
 
-        ItemDto updateItemDto = new ItemDto();
-        updateItemDto.setName("UpdatedItem2");
-        updateItemDto.setDescription("UpdatedDescription2");
-        updateItemDto.setAvailable(false);
-
-        ItemDto updatedItem = itemService.update(createdItemId, updateItemDto, createdUserId);
-
-        assertThat(updatedItem.getName()).isEqualTo("UpdatedItem2");
-        assertThat(updatedItem.getDescription()).isEqualTo("UpdatedDescription2");
-        assertThat(updatedItem.getAvailable()).isFalse();
+        assertThat(result.getId()).isNotNull();
+        assertThat(result.getName()).isEqualTo("DDD");
+        assertThat(result.getOwner().getId()).isEqualTo(owner.getId());
     }
 
     @Test
-    void getItemById_WhenItemExists_ShouldReturnItem() {
-        UserDto user = new UserDto();
-        user.setName("Name1");
-        user.setEmail("name1@mail.ru");
-        UserDto createdUser = userService.create(user);
-        Integer createdUserId = createdUser.getId();
+    void create_WithRequestId_ReturnsSavedItemWithRequest() {
+        User owner = createUser("Owner", "owner@test.com");
+        ItemRequest itemRequest = createRequest("zxczxczxc", owner);
 
-        ItemDto item = new ItemDto();
-        item.setName("Item1");
-        item.setDescription("Description1");
-        item.setAvailable(true);
-        ItemDto createdItem = itemService.create(item, createdUserId);
-        Integer createdItemId = createdItem.getId();
+        ItemDtoRequest request = ItemDtoRequest.builder()
+                .name("DDD")
+                .description("Powerful DDD")
+                .available(true)
+                .requestId(itemRequest.getId())
+                .build();
 
-        ItemDto retrievedItem = itemService.getItemById(createdItemId);
+        ItemDto result = itemService.create(request, owner.getId());
 
-        assertThat(retrievedItem.getId()).isEqualTo(createdItemId);
-        assertThat(retrievedItem.getName()).isEqualTo("Item1");
-        assertThat(retrievedItem.getDescription()).isEqualTo("Description1");
-        assertThat(retrievedItem.getAvailable()).isTrue();
-        assertThat(retrievedItem.getUserId()).isEqualTo(createdUserId);
+        assertThat(result.getId()).isNotNull();
     }
 
     @Test
-    void getItemById_WhenItemDoesNotExist_ShouldThrowNotFoundException() {
-        Integer nonExistentItemId = Integer.MAX_VALUE;
+    void create_WithInvalidRequestId_ThrowsNotFoundException() {
+        User owner = createUser("Owner", "owner@test.com");
+        ItemDtoRequest request = ItemDtoRequest.builder()
+                .name("DDD").description("Desc").available(true).requestId(999).build();
 
-        NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> itemService.getItemById(nonExistentItemId));
-
-        assertTrue(exception.getMessage().contains("not found"));
+        assertThrows(NotFoundException.class, () -> itemService.create(request, owner.getId()));
     }
 
     @Test
-    void addComment_WhenUserHasApprovedBooking_ShouldAddComment() throws InterruptedException {
-        UserDto owner = new UserDto();
-        owner.setName("Owner");
-        owner.setEmail("owner@mail.ru");
-        UserDto createdOwner = userService.create(owner);
-        Integer ownerId = createdOwner.getId();
+    void create_WithInvalidUserId_ThrowsNotFoundException() {
+        ItemDtoRequest request = ItemDtoRequest.builder()
+                .name("DDD").description("Desc").available(true).build();
 
-        UserDto booker = new UserDto();
-        booker.setName("Booker");
-        booker.setEmail("booker@mail.ru");
-        UserDto createdBooker = userService.create(booker);
-        Integer bookerId = createdBooker.getId();
-
-        ItemDto item = new ItemDto();
-        item.setName("Item3");
-        item.setDescription("Description3");
-        item.setAvailable(true);
-        ItemDto createdItem = itemService.create(item, ownerId);
-        Integer itemId = createdItem.getId();
-
-        LocalDateTime start = LocalDateTime.now().plusSeconds(1);
-        LocalDateTime end = LocalDateTime.now().plusSeconds(2);
-        ;
-
-        BookingRequestDto bookingRequest = new BookingRequestDto();
-        bookingRequest.setItemId(itemId);
-        bookingRequest.setStart(start);
-        bookingRequest.setEnd(end);
-
-        BookingDto createdBooking = bookingService.create(bookingRequest, bookerId);
-
-        bookingService.approve(createdBooking.getId(), true, ownerId);
-
-        CommentRequestDto commentRequest = new CommentRequestDto();
-        commentRequest.setText("Great item!");
-
-        TimeUnit.SECONDS.sleep(5);
-        CommentDto createdComment = itemService.addComment(bookerId, itemId, commentRequest);
-
-        assertThat(createdComment.getText()).isEqualTo("Great item!");
-        assertThat(createdComment.getAuthorName()).isEqualTo("Booker");
-        assertThat(createdComment.getItemId()).isEqualTo(itemId);
-        assertThat(createdComment.getUserId()).isEqualTo(bookerId);
+        assertThrows(NotFoundException.class, () -> itemService.create(request, 999));
     }
 
     @Test
-    void updateItem_WhenCalledByNotOwner_ShouldThrowNotFoundException() {
-        UserDto owner = new UserDto();
-        owner.setName("Owner2");
-        owner.setEmail("owner2@mail.ru");
-        UserDto createdOwner = userService.create(owner);
-        Integer ownerId = createdOwner.getId();
+    void update_ValidFields_UpdatesItem() {
+        User owner = createUser("Owner", "owner@test.com");
+        Item item = createItem("OldName", "OldDesc", true, owner);
+        ItemDtoRequest updateDto = ItemDtoRequest.builder()
+                .name("NewName").description("NewDesc").available(false).build();
 
-        UserDto notOwner = new UserDto();
-        notOwner.setName("NotOwner");
-        notOwner.setEmail("notowner@mail.ru");
-        UserDto createdNotOwner = userService.create(notOwner);
-        Integer notOwnerId = createdNotOwner.getId();
+        ItemDto result = itemService.update(updateDto, item.getId(), owner.getId());
 
-        ItemDto item = new ItemDto();
-        item.setName("Item6");
-        item.setDescription("Description6");
-        item.setAvailable(true);
-        ItemDto createdItem = itemService.create(item, ownerId);
-        Integer createdItemId = createdItem.getId();
-
-        ItemDto updateItemDto = new ItemDto();
-        updateItemDto.setName("UpdatedItem6");
-
-        NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> itemService.update(createdItemId, updateItemDto, notOwnerId));
-
-        assertTrue(exception.getMessage().contains("Owner id =/= provided id"));
+        assertThat(result.getName()).isEqualTo("NewName");
+        assertThat(result.getDescription()).isEqualTo("NewDesc");
+        assertThat(result.getAvailable()).isFalse();
     }
 
     @Test
-    void createItem_WhenUserDoesNotExist_ShouldThrowNotFoundException() {
-        Integer nonExistentUserId = Integer.MAX_VALUE;
+    void update_PartialUpdate_UpdatesOnlyProvidedFields() {
+        User owner = createUser("Owner", "owner@test.com");
+        Item item = createItem("OldName", "OldDesc", true, owner);
+        ItemDtoRequest updateDto = ItemDtoRequest.builder().name("NewName").build();
 
-        ItemDto item = new ItemDto();
-        item.setName("Item5");
-        item.setDescription("Description5");
-        item.setAvailable(true);
+        ItemDto result = itemService.update(updateDto, item.getId(), owner.getId());
 
-        NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> itemService.create(item, nonExistentUserId));
+        assertThat(result.getName()).isEqualTo("NewName");
+        assertThat(result.getDescription()).isEqualTo("OldDesc");
+        assertThat(result.getAvailable()).isTrue();
+    }
 
-        assertTrue(exception.getMessage().contains("owner not found"));
+    @Test
+    void update_NotOwner_ThrowsValidationException() {
+        User owner = createUser("Owner", "owner@test.com");
+        User other = createUser("Other", "other@test.com");
+        Item item = createItem("Name", "Desc", true, owner);
+        ItemDtoRequest updateDto = ItemDtoRequest.builder().name("NewName").build();
+
+        assertThrows(ValidationException.class, () -> itemService.update(updateDto, item.getId(), other.getId()));
+    }
+
+    @Test
+    void getById_Owner_ReturnsWithBookings() {
+        User owner = createUser("Owner", "owner@test.com");
+        User booker = createUser("Booker", "booker@test.com");
+        Item item = createItem("Item", "Desc", true, owner);
+
+        createBooking(item, booker, LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1), BookingStatus.APPROVED);
+        createBooking(item, booker, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), BookingStatus.APPROVED);
+
+        ItemDto result = itemService.getById(item.getId(), owner.getId());
+
+        assertThat(result.getLastBooking()).isNotNull();
+        assertThat(result.getNextBooking()).isNotNull();
+    }
+
+    @Test
+    void getById_NotOwner_ReturnsWithoutBookings() {
+        User owner = createUser("Owner", "owner@test.com");
+        User other = createUser("Other", "other@test.com");
+        Item item = createItem("Item", "Desc", true, owner);
+
+        ItemDto result = itemService.getById(item.getId(), other.getId());
+
+        assertThat(result.getLastBooking()).isNull();
+        assertThat(result.getNextBooking()).isNull();
+    }
+
+    @Test
+    void getUserItems_HasItems_ReturnsListWithComments() {
+        User owner = createUser("Owner", "owner@test.com");
+        User author = createUser("Author", "author@test.com");
+        Item item = createItem("Item", "Desc", true, owner);
+        createComment("!!!!!!", author, item);
+
+        List<ItemDtoOwner> result = itemService.getUserItems(owner.getId());
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().getComments()).hasSize(1);
+        assertThat(result.getFirst().getComments().getFirst().getText()).isEqualTo("!!!!!!");
+    }
+
+    @Test
+    void getByText_ValidText_ReturnsMatches() {
+        User owner = createUser("Owner", "owner@test.com");
+        createItem("Power DDD", "Desc", true, owner);
+        createItem("Hammer", "Desc", true, owner);
+
+        List<ItemDto> result = itemService.getByText("DDD", owner.getId());
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().getName()).isEqualTo("Power DDD");
+    }
+
+    @Test
+    void getByText_EmptyText_ReturnsEmptyList() {
+        List<ItemDto> result = itemService.getByText("   ", 1);
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void deleteItem_Owner_DeletesItem() {
+        User owner = createUser("Owner", "owner@test.com");
+        Item item = createItem("Item", "Desc", true, owner);
+
+        itemService.deleteItem(item.getId(), owner.getId());
+
+        assertThat(itemRepository.findById(item.getId())).isEmpty();
+    }
+
+    @Test
+    void deleteItem_NotOwner_ThrowsValidationException() {
+        User owner = createUser("Owner", "owner@test.com");
+        User other = createUser("Other", "other@test.com");
+        Item item = createItem("Item", "Desc", true, owner);
+
+        assertThrows(ValidationException.class, () -> itemService.deleteItem(item.getId(), other.getId()));
+    }
+
+    @Test
+    void addComment_HasPastApprovedBooking_SavesComment() {
+        User owner = createUser("Owner", "owner@test.com");
+        User booker = createUser("Booker", "booker@test.com");
+        Item item = createItem("Item", "Desc", true, owner);
+        createBooking(item, booker, LocalDateTime.now().minusDays(2), LocalDateTime.now().minusDays(1), BookingStatus.APPROVED);
+
+        CommentDtoRequest commentDto = CommentDtoRequest.builder().text("Awesome!").build();
+
+        var result = itemService.addComment(commentDto, booker.getId(), item.getId());
+
+        assertThat(result.getText()).isEqualTo("Awesome!");
+        assertThat(result.getAuthorName()).isEqualTo("Booker");
+    }
+
+    @Test
+    void addComment_NoBooking_ThrowsValidationException() {
+        User owner = createUser("Owner", "owner@test.com");
+        User booker = createUser("Booker", "booker@test.com");
+        Item item = createItem("Item", "Desc", true, owner);
+        CommentDtoRequest commentDto = CommentDtoRequest.builder().text("Awesome!").build();
+
+        assertThrows(ValidationException.class, () -> itemService.addComment(commentDto, booker.getId(), item.getId()));
+    }
+
+
+    private User createUser(String name, String email) {
+        return userRepository.save(User.builder().name(name).email(email).build());
+    }
+
+    private ItemRequest createRequest(String description, User requestor) {
+        return itemRequestRepository.save(ItemRequest.builder()
+                .description(description)
+                .requestor(requestor)
+                .created(LocalDateTime.now())
+                .build());
+    }
+
+    private Item createItem(String name, String description, Boolean available, User owner) {
+        return itemRepository.save(Item.builder()
+                .name(name)
+                .description(description)
+                .available(available)
+                .owner(owner)
+                .build());
+    }
+
+    private Booking createBooking(Item item, User booker, LocalDateTime start, LocalDateTime end, BookingStatus status) {
+        return bookingRepository.save(Booking.builder()
+                .item(item)
+                .booker(booker)
+                .start(start)
+                .end(end)
+                .status(status)
+                .build());
+    }
+
+    private Comment createComment(String text, User author, Item item) {
+        return commentRepository.save(Comment.builder()
+                .text(text)
+                .author(author)
+                .item(item)
+                .created(LocalDateTime.now())
+                .build());
     }
 }

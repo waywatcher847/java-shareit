@@ -1,50 +1,41 @@
 package ru.practicum.shareit.item;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.FieldDefaults;
-import ru.practicum.shareit.item.comment.Comment;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.user.User;
 
-import java.util.ArrayList;
-import java.util.List;
 
-@Data
-@Entity
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+@Builder
+@Entity
 @Table(name = "items")
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Item {
-
     @Id
-    @JsonProperty("id")
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id;
+    private Integer id;
 
-    @JsonProperty("name")
-    @Column(name = "name")
-    String name;
+    @Column(name = "name", nullable = false)
+    private String name;
 
-    @JsonProperty("description")
-    @Column(name = "description")
-    String description;
+    @Column(name = "description", nullable = false)
+    private String description;
 
-    @JsonProperty("available")
-    @Column(name = "available")
-    Boolean available;
+    @Column(name = "available", nullable = false)
+    private Boolean available;
 
-    @JsonProperty("userId")
-    @Column(name = "user_id")
-    Integer userId;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    private User owner;
 
-    @JsonProperty("requestId")
-    @Column(name = "request_id")
-    Integer requestId;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "request_id")
+    private ItemRequest request;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_id")
-    private List<Comment> comments = new ArrayList<>();
 }
+

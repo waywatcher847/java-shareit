@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
-import ru.practicum.common.item.ItemDto;
+import ru.practicum.common.item.ItemDtoRequest;
 
 import java.io.IOException;
 import java.util.Set;
@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @JsonTest
 public class ItemDtoJsonTests {
     @Autowired
-    private JacksonTester<ItemDto> json;
+    private JacksonTester<ItemDtoRequest> json;
 
     private final Validator validator;
 
@@ -35,10 +35,10 @@ public class ItemDtoJsonTests {
                 "                        \"requestId\": 111\n" +
                 "                    }";
 
-        ItemDto itemDto1 = json.parseObject(invalidJson1);
+        ItemDtoRequest itemDto1 = json.parseObject(invalidJson1);
 
-        Set<ConstraintViolation<ItemDto>> violations1 =
-                validator.validate(itemDto1);
+        Set<ConstraintViolation<ItemDtoRequest>> violations1 =
+                validator.validate(itemDto1, ItemDtoRequest.Create.class);
 
         assertThat(violations1).hasSize(1);
         assertThat(violations1)
@@ -52,10 +52,10 @@ public class ItemDtoJsonTests {
                 "                        \"requestId\": 111\n" +
                 "                    }";
 
-        ItemDto itemDto2 = json.parseObject(invalidJson2);
+        ItemDtoRequest itemDto2 = json.parseObject(invalidJson2);
 
-        Set<ConstraintViolation<ItemDto>> violations2 =
-                validator.validate(itemDto2);
+        Set<ConstraintViolation<ItemDtoRequest>> violations2 =
+                validator.validate(itemDto2, ItemDtoRequest.Create.class);
 
         assertThat(violations2).hasSize(1);
         assertThat(violations2)
@@ -69,10 +69,10 @@ public class ItemDtoJsonTests {
                 "                        \"requestId\": 111\n" +
                 "                    }";
 
-        ItemDto itemDto3 = json.parseObject(invalidJson3);
+        ItemDtoRequest itemDto3 = json.parseObject(invalidJson3);
 
-        Set<ConstraintViolation<ItemDto>> violations3 =
-                validator.validate(itemDto3);
+        Set<ConstraintViolation<ItemDtoRequest>> violations3 =
+                validator.validate(itemDto3, ItemDtoRequest.Create.class);
 
         assertThat(violations3).hasSize(1);
         assertThat(violations3)
@@ -89,12 +89,12 @@ public class ItemDtoJsonTests {
                 "                        \"requestId\": 111\n" +
                 "                    }";
 
-        ItemDto itemDto = json.parseObject(validJson);
+        ItemDtoRequest itemDtoRequest = json.parseObject(validJson);
 
-        assertThat(itemDto.getName()).isEqualTo("Item");
-        assertThat(itemDto.getDescription()).isEqualTo("description");
-        assertThat(itemDto.getAvailable()).isEqualTo(true);
-        assertThat(itemDto.getRequestId()).isEqualTo(111);
+        assertThat(itemDtoRequest.getName()).isEqualTo("Item");
+        assertThat(itemDtoRequest.getDescription()).isEqualTo("description");
+        assertThat(itemDtoRequest.getAvailable()).isEqualTo(true);
+        assertThat(itemDtoRequest.getRequestId()).isEqualTo(111);
     }
 
     @Test
@@ -105,10 +105,10 @@ public class ItemDtoJsonTests {
                 "                        \"requestId\": 111\n" +
                 "                    }";
 
-        ItemDto itemDto1 = json.parseObject(invalidJson1);
+        ItemDtoRequest itemDto1 = json.parseObject(invalidJson1);
 
-        Set<ConstraintViolation<ItemDto>> violations1 =
-                validator.validate(itemDto1);
+        Set<ConstraintViolation<ItemDtoRequest>> violations1 =
+                validator.validate(itemDto1, ItemDtoRequest.Create.class);
 
         assertThat(violations1).hasSize(1);
         assertThat(violations1)
@@ -124,10 +124,10 @@ public class ItemDtoJsonTests {
                 "                        \"requestId\": 111\n" +
                 "                    }";
 
-        ItemDto itemDto1 = json.parseObject(invalidJson1);
+        ItemDtoRequest itemDto1 = json.parseObject(invalidJson1);
 
-        Set<ConstraintViolation<ItemDto>> violations1 =
-                validator.validate(itemDto1);
+        Set<ConstraintViolation<ItemDtoRequest>> violations1 =
+                validator.validate(itemDto1, ItemDtoRequest.Create.class);
 
         assertThat(violations1).hasSize(1);
         assertThat(violations1)
@@ -142,10 +142,10 @@ public class ItemDtoJsonTests {
                 "                    }";
 
 
-        ItemDto itemDto2 = json.parseObject(invalidJson2);
+        ItemDtoRequest itemDto2 = json.parseObject(invalidJson2);
 
-        Set<ConstraintViolation<ItemDto>> violations2 =
-                validator.validate(itemDto2);
+        Set<ConstraintViolation<ItemDtoRequest>> violations2 =
+                validator.validate(itemDto2, ItemDtoRequest.Create.class);
 
         assertThat(violations2).hasSize(1);
         assertThat(violations2)
@@ -160,10 +160,10 @@ public class ItemDtoJsonTests {
                 "                    }";
 
 
-        ItemDto itemDto3 = json.parseObject(invalidJson3);
+        ItemDtoRequest itemDto3 = json.parseObject(invalidJson3);
 
-        Set<ConstraintViolation<ItemDto>> violations3 =
-                validator.validate(itemDto3);
+        Set<ConstraintViolation<ItemDtoRequest>> violations3 =
+                validator.validate(itemDto3, ItemDtoRequest.Create.class);
 
         assertThat(violations3).hasSize(1);
         assertThat(violations3)

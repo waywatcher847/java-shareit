@@ -8,18 +8,17 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.common.user.UserDto;
+import ru.practicum.common.user.UserDtoNew;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.item.ItemService;
-import ru.practicum.shareit.request.ItemRequestService;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
-public class UserControllerTests {
+class UserControllerTests {
 
     @Autowired
     private MockMvc mockMvc;
@@ -30,90 +29,112 @@ public class UserControllerTests {
     @MockBean
     private UserService userService;
 
-    @MockBean
-    private ItemService itemService;
-
-    @MockBean
-    private ItemRequestService requestService;
-
     @Test
-    void getUserById_ReturnsOk() throws Exception {
-        Integer userId = 1;
-        UserDto responseDto = UserDto.builder().id(userId).name("John").email("john@test.com").build();
+    void createUser_shouldReturn201() throws Exception {
+        UserDtoNew newUser = new UserDtoNew();
+        newUser.setName("User");
+        newUser.setEmail("User@yandex.ru");
 
-        when(userService.getUserById(userId)).thenReturn(responseDto);
+        UserDto savedUser = new UserDto();
+        savedUser.setId(1);
+        savedUser.setName("User");
+        savedUser.setEmail("user@yandex.ru");
 
-        mockMvc.perform(get("/internal/users/{userId}", userId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(userId))
-                .andExpect(jsonPath("$.name").value("John"));
-    }
-
-    @Test
-    void createUser_ReturnsCreated() throws Exception {
-        UserDto requestDto = UserDto.builder().name("John").email("john@test.com").build();
-        UserDto responseDto = UserDto.builder().id(1).name("John").email("john@test.com").build();
-
-        when(userService.create(requestDto)).thenReturn(responseDto);
+        when(userService.create(any(UserDtoNew.class))).thenReturn(savedUser);
 
         mockMvc.perform(post("/internal/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
+                        .content(objectMapper.writeValueAsString(newUser)))
                 .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "/users/1"))
                 .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("John"))
-                .andExpect(jsonPath("$.email").value("john@test.com"));
+                .andExpect(jsonPath("$.name").value("User"));
     }
 
     @Test
-    void updateUser_InvalidId_ReturnsBadRequest() throws Exception {
-        UserDto requestDto = UserDto.builder().id(2).name("John").email("john@test.com").build();
+    void getUserById_shouldReturn200() throws Exception {
+        UserDto user = new UserDto();
+        user.setId(1);
+        user.setName("User");
 
-        when(userService.update(1, requestDto))
-                .thenThrow(new ValidationException("ID in request =/= ID in URL"));
+        when(userService.getById(1)).thenReturn(user);
 
-        mockMvc.perform(patch("/internal/users/{userId}", 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
-                .andExpect(status().isBadRequest());
+        mockMvc.perform(get("/internal/users/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1));
     }
 
     @Test
-    void getUserById_NotFound_Returns404() throws Exception {
-        Integer userId = 999;
-
-        when(userService.getUserById(userId)).thenThrow(new NotFoundException("User not found"));
-
-        mockMvc.perform(get("/internal/users/{userId}", userId))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void createUser_WhenInvalidJson_ReturnsBadRequest() throws Exception {
-        mockMvc.perform(post("/internal/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("invalid json string"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void updateUser_WhenInvalidIdType_ReturnsBadRequest() throws Exception {
-        mockMvc.perform(patch("/internal/users/{userId}", "not_a_number")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void deleteUserById_WhenUserExists_ReturnsNoContent() throws Exception {
-        Integer userId = 1;
-        mockMvc.perform(delete("/internal/users/{userId}", userId))
+    void deleteUser_shouldReturn204() throws Exception {
+        mockMvc.perform(delete("/internal/users/1"))
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    void getUserById_WhenInvalidIdType_ReturnsBadRequest() throws Exception {
-        mockMvc.perform(get("/internal/users/{userId}", "invalid"))
-                .andExpect(status().isBadRequest());
+    void update_shouldReturn200() throws Exception {
+        UserDtoNew request = new UserDtoNew();
+        request.setName("upd Name");
+        request.setEmail("upd@yandex.ru");
+
+        UserDto updatedUser = new UserDto();
+        updatedUser.setId(1);
+        updatedUser.setName("upd Name");
+        updatedUser.setEmail("upd@yandex.ru");
+
+        when(userService.update(any(UserDtoNew.class), eq(1)))
+                .thenReturn(updatedUser);
+
+        mockMvc.perform(patch("/internal/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("upd Name"))
+                .andExpect(jsonPath("$.email").value("upd@yandex.ru"));
+    }
+
+    @Test
+    void update_partialData_shouldReturn200() throws Exception {
+        UserDtoNew request = new UserDtoNew();
+        request.setName("Only Name Updated");
+
+        UserDto updatedUser = new UserDto();
+        updatedUser.setId(1);
+        updatedUser.setName("Only Name Updated");
+        updatedUser.setEmail("old@yandex.ru");
+
+        when(userService.update(any(UserDtoNew.class), eq(1)))
+                .thenReturn(updatedUser);
+
+        mockMvc.perform(patch("/internal/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Only Name Updated"))
+                .andExpect(jsonPath("$.email").value("old@yandex.ru"));
+    }
+
+    @Test
+    void updateUser_notFound_shouldReturn404() throws Exception {
+        UserDtoNew request = new UserDtoNew();
+        request.setName("upd Name");
+        request.setEmail("upd@yandex.ru");
+
+        when(userService.update(any(UserDtoNew.class), eq(999)))
+                .thenThrow(new NotFoundException("User with id=999 not found"));
+
+        mockMvc.perform(patch("/internal/users/999")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteUser_notFound_shouldReturn404() throws Exception {
+        org.mockito.Mockito.doThrow(new NotFoundException("User with id=999 not found"))
+                .when(userService).delete(eq(999));
+
+        mockMvc.perform(delete("/internal/users/999"))
+                .andExpect(status().isNotFound());
     }
 }

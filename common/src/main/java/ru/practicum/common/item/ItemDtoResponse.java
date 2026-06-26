@@ -1,17 +1,19 @@
 package ru.practicum.common.item;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
+import ru.practicum.common.user.UserDto;
 
-@Data
+
+@Getter
+@Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ItemResponseDto {
+public class ItemDtoResponse {
     Integer itemId;
     String name;
-    Integer userId;
+    UserDto user;
+
 }

@@ -5,9 +5,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.common.Constants;
 import ru.practicum.common.comment.CommentDto;
-import ru.practicum.common.comment.CommentRequestDto;
+import ru.practicum.common.comment.CommentDtoRequest;
 import ru.practicum.common.item.ItemDto;
+import ru.practicum.common.item.ItemDtoRequest;
+import ru.practicum.common.item.ItemDtoOwner;
 
 import java.net.URI;
 import java.util.List;
@@ -21,8 +24,8 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public ResponseEntity<ItemDto> create(@Valid @RequestBody ItemDto itemDto,
-                                          @RequestHeader("X-Sharer-User-Id") Integer userId) {
+    public ResponseEntity<ItemDto> create(@Valid @RequestBody ItemDtoRequest itemDto,
+                                          @RequestHeader(Constants.USER_ID_HEADER) Integer userId) {
         log.info("Server: POST /items, userId={}, itemDto={}", userId, itemDto);
         ItemDto createdItem = itemService.create(itemDto, userId);
         return ResponseEntity
@@ -32,43 +35,43 @@ public class ItemController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<ItemDto> update(@PathVariable Integer id,
-                                          @Valid @RequestBody ItemDto itemDto,
-                                          @RequestHeader("X-Sharer-User-Id") Integer userId) {
+                                          @RequestBody ItemDtoRequest itemDto,
+                                          @RequestHeader(Constants.USER_ID_HEADER) Integer userId) {
         log.info("Server: PATCH /items/{}, userId={}, itemDto={}", id, userId, itemDto);
-        ItemDto updatedItem = itemService.update(id, itemDto, userId);
+        ItemDto updatedItem = itemService.update(itemDto, id, userId);
         return ResponseEntity.ok(updatedItem);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ItemDto> getItemById(@PathVariable Integer id,
-                                               @RequestHeader("X-Sharer-User-Id") Integer userId) {
+                                               @RequestHeader(Constants.USER_ID_HEADER) Integer userId) {
         log.info("Server: GET /items/{}, userId={}", id, userId);
-        ItemDto item = itemService.getItemByIdWithDetails(id, userId);
+        ItemDto item = itemService.getById(id, userId);
         return ResponseEntity.ok(item);
     }
 
     @GetMapping
-    public ResponseEntity<List<ItemDto>> getAllItemsByUser(@RequestHeader("X-Sharer-User-Id") Integer userId) {
+    public ResponseEntity<List<ItemDtoOwner>> getAllItemsByUser(@RequestHeader(Constants.USER_ID_HEADER) Integer userId) {
         log.info("Server: GET /items, userId={}", userId);
-        List<ItemDto> items = itemService.getAllItemsByUser(userId);
+        List<ItemDtoOwner> items = itemService.getUserItems(userId);
         return ResponseEntity.ok(items);
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<ItemDto>> searchItem(@RequestParam String text,
-                                                    @RequestHeader("X-Sharer-User-Id") Integer userId) {
+                                                    @RequestHeader(Constants.USER_ID_HEADER) Integer userId) {
         log.info("Server: GET /items/search, text='{}', userId={}", text, userId);
-        List<ItemDto> items = itemService.searchItem(text, userId);
+        List<ItemDto> items = itemService.getByText(text, userId);
         return ResponseEntity.ok(items);
     }
 
     @PostMapping("/{itemId}/comment")
     public ResponseEntity<CommentDto> addComment(
             @PathVariable Integer itemId,
-            @RequestHeader("X-Sharer-User-Id") Integer userId,
-            @RequestBody CommentRequestDto commentRequestDto) {
-        log.info("Server: POST /items/{}/comment, userId={}, comment={}", itemId, userId, commentRequestDto);
-        CommentDto comment = itemService.addComment(userId, itemId, commentRequestDto);
+            @RequestHeader(Constants.USER_ID_HEADER) Integer userId,
+            @RequestBody @Valid CommentDtoRequest commentDtoRequest) {
+        log.info("Server: POST /items/{}/comment, userId={}, comment={}", itemId, userId, commentDtoRequest);
+        CommentDto comment = itemService.addComment(commentDtoRequest, userId, itemId);
         return ResponseEntity.ok(comment);
     }
 }

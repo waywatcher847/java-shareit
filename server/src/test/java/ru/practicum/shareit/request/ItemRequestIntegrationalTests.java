@@ -1,133 +1,179 @@
 package ru.practicum.shareit.request;
 
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.common.request.ItemRequestDto;
-import ru.practicum.common.user.UserDto;
+import ru.practicum.common.request.ItemRequestDtoResponse;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class ItemRequestIntegrationalTests {
+class ItemRequestIntegrationalTests {
 
-    private final ItemRequestService itemRequestService;
-    private final UserService userService;
+    @Autowired
+    private ItemRequestService itemRequestService;
+
+    @Autowired
+    private ItemRequestRepository itemRequestRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ItemRepository itemRepository;
 
     @Test
-    void createRequest_WhenUserDoesNotExist_ShouldThrowNotFoundException() {
-        Integer nonExistentUserId = 99;
+    void createRequest_UserExists_ReturnsSavedRequest() {
+        User user = createUser("User", "user@test.com");
+        ItemRequestDto dto = ItemRequestDto.builder().description("Need a tool").build();
 
-        ItemRequestDto requestDto = new ItemRequestDto();
-        requestDto.setDescription("I need something");
+        ItemRequestDtoResponse response = itemRequestService.createRequest(user.getId(), dto);
 
-        NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> itemRequestService.createRequest(nonExistentUserId, requestDto));
-
-        assertEquals("User not found!", exception.getMessage());
+        assertThat(response.getId()).isNotNull();
+        assertThat(response.getDescription()).isEqualTo("Need a tool");
+        assertThat(response.getCreated()).isNotNull();
+        assertThat(response.getItems()).isEmpty();
     }
 
     @Test
-    void createRequest_WhenUserExists_ShouldCreateRequest() {
-        UserDto userDto = UserDto.builder()
-                .name("User1")
-                .email("user1@mail.ru")
+    void createRequest_UserNotExists_ThrowsNotFoundException() {
+        ItemRequestDto dto = ItemRequestDto.builder().description("Need a tool").build();
+
+        assertThrows(NotFoundException.class, () -> itemRequestService.createRequest(999, dto));
+    }
+
+    @Test
+    void getRequestById_RequestExistsNoItems_ReturnsRequest() {
+        User user = createUser("User", "user@test.com");
+        ItemRequest request = createRequest("Desc", user, LocalDateTime.now());
+
+        ItemRequestDtoResponse response = itemRequestService.getRequestById(user.getId(), request.getId());
+
+        assertThat(response.getId()).isEqualTo(request.getId());
+        assertThat(response.getDescription()).isEqualTo("Desc");
+        assertThat(response.getItems()).isEmpty();
+    }
+
+    @Test
+    void getRequestById_RequestExistsWithItems_ReturnsRequestWithItems() {
+        User user = createUser("User", "user@test.com");
+        User owner = createUser("Owner", "owner@test.com");
+        ItemRequest request = createRequest("Desc", user, LocalDateTime.now());
+
+        // Передаем сам объект request, а не его ID
+        createItem("Item1", owner, request);
+        createItem("Item2", owner, request);
+
+        ItemRequestDtoResponse response = itemRequestService.getRequestById(user.getId(), request.getId());
+
+        assertThat(response.getItems()).hasSize(2);
+        assertThat(response.getItems())
+                .extracting("name")
+                .containsExactlyInAnyOrder("Item1", "Item2");
+    }
+
+    @Test
+    void getRequestById_RequestNotExists_ThrowsNotFoundException() {
+        User user = createUser("User", "user@test.com");
+        assertThrows(NotFoundException.class, () -> itemRequestService.getRequestById(user.getId(), 999));
+    }
+
+    @Test
+    void getUserRequests_UserHasNoRequests_ReturnsEmptyList() {
+        User user = createUser("User", "user@test.com");
+
+        List<ItemRequestDtoResponse> responses = itemRequestService.getUserRequests(user.getId());
+
+        assertThat(responses).isEmpty();
+    }
+
+    @Test
+    void getUserRequests_UserHasRequests_ReturnsSortedRequests() {
+        User user = createUser("User", "user@test.com");
+        createRequest("Old", user, LocalDateTime.now().minusDays(1));
+        createRequest("New", user, LocalDateTime.now());
+
+        List<ItemRequestDtoResponse> responses = itemRequestService.getUserRequests(user.getId());
+
+        assertThat(responses).hasSize(2);
+        assertThat(responses.get(0).getDescription()).isEqualTo("New");
+        assertThat(responses.get(1).getDescription()).isEqualTo("Old");
+    }
+
+    @Test
+    void getAllRequests_NoRequests_ReturnsEmptyList() {
+        User user = createUser("User", "user@test.com");
+        List<ItemRequestDtoResponse> responses = itemRequestService.getAllRequests(user.getId());
+        assertThat(responses).isEmpty();
+    }
+
+    @Test
+    void getAllRequests_ExcludesCurrentUserAndSorted() {
+        User currentUser = createUser("Current", "current@test.com");
+        User user1 = createUser("User1", "u1@test.com");
+        User user2 = createUser("User2", "u2@test.com");
+
+        createRequest("Old", user1, LocalDateTime.now().minusDays(2));
+        createRequest("New", user2, LocalDateTime.now().minusDays(1));
+        createRequest("Current Req", currentUser, LocalDateTime.now());
+
+        List<ItemRequestDtoResponse> responses = itemRequestService.getAllRequests(currentUser.getId());
+
+        assertThat(responses).hasSize(2);
+        assertThat(responses.get(0).getDescription()).isEqualTo("New");
+        assertThat(responses.get(1).getDescription()).isEqualTo("Old");
+    }
+
+    @Test
+    void getAllRequests_ChecksItemsOwnerMapping() {
+        User currentUser = createUser("Current", "current@test.com");
+        User requestor = createUser("Requestor", "requestor@test.com");
+        User itemOwner = createUser("Owner", "owner@test.com");
+
+        ItemRequest request = createRequest("Req", requestor, LocalDateTime.now());
+        createItem("Item1", itemOwner, request);
+
+        List<ItemRequestDtoResponse> responses = itemRequestService.getAllRequests(currentUser.getId());
+
+        assertThat(responses).hasSize(1);
+        assertThat(responses.getFirst().getItems()).hasSize(1);
+        assertThat(responses.getFirst().getItems().getFirst().getUser().getEmail()).isEqualTo("owner@test.com");
+    }
+
+    private User createUser(String name, String email) {
+        User user = User.builder().name(name).email(email).build();
+        return userRepository.save(user);
+    }
+
+    private ItemRequest createRequest(String description, User requestor, LocalDateTime created) {
+        ItemRequest request = ItemRequest.builder()
+                .description(description)
+                .requestor(requestor)
+                .created(created)
                 .build();
-        UserDto createdUser = userService.create(userDto);
-        Integer userId = createdUser.getId();
-
-        ItemRequestDto requestDto = new ItemRequestDto();
-        requestDto.setDescription("I need a drill for the weekend");
-
-        ItemRequestDto createdRequest = itemRequestService.createRequest(userId, requestDto);
-        Integer requestId = createdRequest.getId();
-
-        ItemRequestDto retrievedRequest = itemRequestService.getRequestById(userId, requestId);
-
-        assertThat(retrievedRequest.getId()).isEqualTo(requestId);
-        assertThat(retrievedRequest.getDescription()).isEqualTo("I need a drill for the weekend");
-        assertThat(retrievedRequest.getItems()).isNotNull().isEmpty();
+        return itemRequestRepository.save(request);
     }
 
-    @Test
-    void getRequestById_WhenRequestDoesNotExist_ShouldThrowNotFoundException() {
-        UserDto userDto = UserDto.builder().name("User2").email("user2@mail.ru").build();
-        UserDto createdUser = userService.create(userDto);
-        Integer userId = createdUser.getId();
-
-        NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> itemRequestService.getRequestById(userId, 99));
-
-        assertEquals("Request not found", exception.getMessage());
-    }
-
-    @Test
-    void getRequestById_WhenUserDoesNotExist_ShouldThrowNotFoundException() {
-        Integer nonExistentUserId = 99;
-        Integer requestId = 1;
-
-        NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> itemRequestService.getRequestById(nonExistentUserId, requestId));
-
-        assertEquals("User not found!", exception.getMessage());
-    }
-
-    @Test
-    void getAllRequests_WhenFetchingAll_ShouldExcludeOwnRequests() {
-        UserDto user1Dto = UserDto.builder().name("User4").email("user4@mail.ru").build();
-        UserDto createdUser1 = userService.create(user1Dto);
-        Integer user1Id = createdUser1.getId();
-
-        UserDto user2Dto = UserDto.builder().name("User5").email("user5@mail.ru").build();
-        UserDto createdUser2 = userService.create(user2Dto);
-        Integer user2Id = createdUser2.getId();
-
-        ItemRequestDto req1 = new ItemRequestDto();
-        req1.setDescription("User1 Request");
-        itemRequestService.createRequest(user1Id, req1);
-
-        ItemRequestDto req2 = new ItemRequestDto();
-        req2.setDescription("User2 Request");
-        itemRequestService.createRequest(user2Id, req2);
-
-        List<ItemRequestDto> requestsForUser1 = itemRequestService.getAllRequests(user1Id, 0, 10);
-        assertThat(requestsForUser1).hasSize(1);
-        assertThat(requestsForUser1.getFirst().getDescription()).isEqualTo("User2 Request");
-
-        List<ItemRequestDto> requestsForUser2 = itemRequestService.getAllRequests(user2Id, 0, 10);
-        assertThat(requestsForUser2).hasSize(1);
-        assertThat(requestsForUser2.getFirst().getDescription()).isEqualTo("User1 Request");
-    }
-
-    @Test
-    void getUserRequests_WhenUserHasRequests_ShouldReturnUserRequests() {
-        UserDto userDto = UserDto.builder().name("User3").email("user3@mail.ru").build();
-        UserDto createdUser = userService.create(userDto);
-        Integer userId = createdUser.getId();
-
-        ItemRequestDto req1 = new ItemRequestDto();
-        req1.setDescription("Request 1");
-        itemRequestService.createRequest(userId, req1);
-
-        ItemRequestDto req2 = new ItemRequestDto();
-        req2.setDescription("Request 2");
-        itemRequestService.createRequest(userId, req2);
-
-        List<ItemRequestDto> requests = itemRequestService.getUserRequests(userId);
-
-        assertThat(requests).hasSize(2);
-        assertThat(requests)
-                .extracting(ItemRequestDto::getDescription)
-                .containsExactlyInAnyOrder("Request 1", "Request 2");
+    private Item createItem(String name, User owner, ItemRequest request) {
+        Item item = Item.builder()
+                .name(name)
+                .description("Description for " + name)
+                .available(true)
+                .owner(owner)
+                .request(request)
+                .build();
+        return itemRepository.save(item);
     }
 }

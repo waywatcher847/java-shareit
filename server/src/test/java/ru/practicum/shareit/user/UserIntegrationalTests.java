@@ -1,164 +1,148 @@
 package ru.practicum.shareit.user;
 
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.common.user.UserDto;
-import ru.practicum.shareit.exception.InternalServerException;
+import ru.practicum.common.user.UserDtoNew;
+import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
-public class UserIntegrationalTests {
-    private final UserService userService;
+class UserIntegrationalTests {
 
+    @Autowired
+    private UserServiceImpl userService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
-    void createUser_WhenEmailAlreadyExists_ShouldThrowInternalServerException() {
-        UserDto userDto1 = UserDto.builder()
-                .name("Name2")
-                .email("name2@mail.ru")
+    void create_ValidUser_ReturnsSavedUser() {
+        UserDtoNew newUser = UserDtoNew.builder()
+                .name("John Doe")
+                .email("john@example.com")
                 .build();
 
-        UserDto userDto2 = UserDto.builder()
-                .name("Name3")
-                .email("name2@mail.ru")
-                .build();
+        UserDto savedUser = userService.create(newUser);
 
-        UserDto createdUser = userService.create(userDto1);
-        Integer createdUserId = createdUser.getId();
-
-        UserDto retrievedUser = userService.getUserById(createdUserId);
-        assertThat(retrievedUser.getEmail()).isEqualTo(userDto1.getEmail());
-
-        InternalServerException exception = assertThrows(InternalServerException.class,
-                () -> userService.create(userDto2));
-
-        assertEquals("User with email name2@mail.ru already exists", exception.getMessage());
+        assertThat(savedUser.getId()).isNotNull();
+        assertThat(savedUser.getName()).isEqualTo("John Doe");
+        assertThat(savedUser.getEmail()).isEqualTo("john@example.com");
     }
 
     @Test
-    void createUser_WhenValidData_ShouldCreateAndRetrieveUser() {
-        UserDto userDto = UserDto.builder()
-                .name("Name1")
-                .email("name1@mail.ru")
-                .build();
+    void create_DuplicateEmail_ThrowsConflictException() {
+        userService.create(UserDtoNew.builder().name("User1").email("test@example.com").build());
+        UserDtoNew user2 = UserDtoNew.builder().name("User2").email("test@example.com").build();
 
-        UserDto createdUser = userService.create(userDto);
-        Integer createdUserId = createdUser.getId();
-
-        UserDto retrievedUser = userService.getUserById(createdUserId);
-
-        assertThat(retrievedUser.getId()).isEqualTo(createdUserId);
-        assertThat(retrievedUser.getName()).isEqualTo(userDto.getName());
-        assertThat(retrievedUser.getEmail()).isEqualTo(userDto.getEmail());
+        assertThrows(ConflictException.class, () -> userService.create(user2));
     }
 
     @Test
-    void updateUser_WhenValidData_ShouldReturnUpdatedUser() {
-        UserDto userDto = UserDto.builder()
-                .name("Name4")
-                .email("name4@mail.ru")
-                .build();
+    void create_DuplicateEmailCaseInsensitive_ThrowsConflictException() {
+        userService.create(UserDtoNew.builder().name("User1").email("test@example.com").build());
+        UserDtoNew user2 = UserDtoNew.builder().name("User2").email("TEST@EXAMPLE.COM").build();
 
-        UserDto createdUser = userService.create(userDto);
-        Integer createdUserId = createdUser.getId();
-
-        UserDto updateDto = UserDto.builder()
-                .name("UpdatedName")
-                .email("updated@mail.ru")
-                .build();
-
-        UserDto updatedUser = userService.update(createdUserId, updateDto);
-
-        assertThat(updatedUser.getId()).isEqualTo(createdUserId);
-        assertThat(updatedUser.getName()).isEqualTo("UpdatedName");
-        assertThat(updatedUser.getEmail()).isEqualTo("updated@mail.ru");
+        assertThrows(ConflictException.class, () -> userService.create(user2));
     }
 
     @Test
-    void getUserById_WhenUserDoesNotExist_ShouldThrowNotFoundException() {
-        Integer nonExistentId = 9999;
-
-        NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> userService.getUserById(nonExistentId));
-
-        assertEquals("User with ID 9999 not found", exception.getMessage());
+    void getAll_EmptyDatabase_ReturnsEmptyList() {
+        List<UserDto> users = userService.getAll();
+        assertThat(users).isEmpty();
     }
 
     @Test
-    void updateUser_WhenEmailAlreadyExists_ShouldThrowInternalServerException() {
-        UserDto user1 = UserDto.builder().name("User1").email("user1@mail.ru").build();
-        UserDto user2 = UserDto.builder().name("User2").email("user2@mail.ru").build();
+    void getAll_NonEmptyDatabase_ReturnsAllUsers() {
+        userService.create(UserDtoNew.builder().name("User1").email("u1@test.com").build());
+        userService.create(UserDtoNew.builder().name("User2").email("u2@test.com").build());
 
-        userService.create(user1);
-        UserDto createdUser2 = userService.create(user2);
-        Integer userId2 = createdUser2.getId();
+        List<UserDto> users = userService.getAll();
 
-        UserDto updateDto = UserDto.builder()
-                .email("user1@mail.ru")
-                .build();
-
-        InternalServerException exception = assertThrows(InternalServerException.class,
-                () -> userService.update(userId2, updateDto));
-
-        assertEquals("Email user1@mail.ru is already used", exception.getMessage());
+        assertThat(users).hasSize(2);
     }
 
     @Test
-    void updateUser_WhenIdMismatch_ShouldThrowInternalServerException() {
-        UserDto userDto = UserDto.builder()
-                .name("Name5")
-                .email("name5@mail.ru")
-                .build();
+    void getById_ExistingUser_ReturnsUser() {
+        UserDto created = userService.create(UserDtoNew.builder().name("User").email("u@test.com").build());
 
-        UserDto createdUser = userService.create(userDto);
-        Integer createdUserId = createdUser.getId();
+        UserDto found = userService.getById(created.getId());
 
-        UserDto updateDto = UserDto.builder()
-                .id(createdUserId + 1)
-                .name("UpdatedName")
-                .email("updated@mail.ru")
-                .build();
-
-        InternalServerException exception = assertThrows(InternalServerException.class,
-                () -> userService.update(createdUserId, updateDto));
-
-        assertEquals("ID in request =/= ID in URL", exception.getMessage());
+        assertThat(found).isNotNull();
+        assertThat(found.getId()).isEqualTo(created.getId());
+        assertThat(found.getName()).isEqualTo("User");
     }
 
     @Test
-    void deleteUserById_WhenUserDoesNotExist_ShouldThrowNotFoundException() {
-        Integer nonExistentId = 9998;
-
-        NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> userService.deleteUserById(nonExistentId));
-
-        assertEquals("User with ID 9998 not found", exception.getMessage());
+    void getById_NonExistingUser_ThrowsNotFoundException() {
+        assertThrows(NotFoundException.class, () -> userService.getById(999));
     }
 
     @Test
-    void deleteUserById_WhenUserExists_ShouldDeleteUser() {
-        UserDto userDto = UserDto.builder()
-                .name("Name6")
-                .email("name6@mail.ru")
-                .build();
+    void update_ValidFields_UpdatesUser() {
+        UserDto created = userService.create(UserDtoNew.builder().name("OldName").email("old@test.com").build());
+        UserDtoNew updateData = UserDtoNew.builder().name("NewName").email("new@test.com").build();
 
-        UserDto createdUser = userService.create(userDto);
-        Integer createdUserId = createdUser.getId();
+        UserDto updated = userService.update(updateData, created.getId());
 
-        userService.deleteUserById(createdUserId);
+        assertThat(updated.getName()).isEqualTo("NewName");
+        assertThat(updated.getEmail()).isEqualTo("new@test.com");
+    }
 
-        NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> userService.getUserById(createdUserId));
+    @Test
+    void update_PartialUpdateNullName_UpdatesOnlyEmail() {
+        UserDto created = userService.create(UserDtoNew.builder().name("OldName").email("old@test.com").build());
+        UserDtoNew updateData = UserDtoNew.builder().email("new@test.com").build();
 
-        assertEquals("User with ID " + createdUserId + " not found", exception.getMessage());
+        UserDto updated = userService.update(updateData, created.getId());
+
+        assertThat(updated.getName()).isEqualTo("OldName");
+        assertThat(updated.getEmail()).isEqualTo("new@test.com");
+    }
+
+    @Test
+    void update_BlankName_DoesNotUpdateName() {
+        UserDto created = userService.create(UserDtoNew.builder().name("OldName").email("old@test.com").build());
+        UserDtoNew updateData = UserDtoNew.builder().name("   ").email("new@test.com").build();
+
+        UserDto updated = userService.update(updateData, created.getId());
+
+        assertThat(updated.getName()).isEqualTo("OldName");
+        assertThat(updated.getEmail()).isEqualTo("new@test.com");
+    }
+
+    @Test
+    void update_NonExistingUser_ThrowsValidationException() {
+        UserDtoNew updateData = UserDtoNew.builder().name("NewName").email("new@test.com").build();
+
+        assertThrows(ValidationException.class, () -> userService.update(updateData, 999));
+    }
+
+    @Test
+    void update_DuplicateEmail_ThrowsConflictException() {
+        UserDto user1 = userService.create(UserDtoNew.builder().name("User1").email("u1@test.com").build());
+        UserDto user2 = userService.create(UserDtoNew.builder().name("User2").email("u2@test.com").build());
+
+        UserDtoNew updateData = UserDtoNew.builder().email("u1@test.com").build();
+
+        assertThrows(ConflictException.class, () -> userService.update(updateData, user2.getId()));
+    }
+
+    @Test
+    void delete_ExistingUser_DeletesUser() {
+        UserDto created = userService.create(UserDtoNew.builder().name("User").email("u@test.com").build());
+
+        userService.delete(created.getId());
+
+        assertThrows(NotFoundException.class, () -> userService.getById(created.getId()));
     }
 }

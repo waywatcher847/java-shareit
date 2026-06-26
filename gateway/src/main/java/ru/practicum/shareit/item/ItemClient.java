@@ -8,11 +8,9 @@ import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import ru.practicum.common.comment.CommentRequestDto;
-import ru.practicum.common.item.ItemDto;
+import ru.practicum.common.comment.CommentDtoRequest;
+import ru.practicum.common.item.ItemDtoRequest;
 import ru.practicum.shareit.client.BaseClient;
-
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -39,25 +37,22 @@ public class ItemClient extends BaseClient {
         return get("", userId);
     }
 
-    public ResponseEntity<Object> searchText(String text) {
+    public ResponseEntity<Object> searchText(String text, Integer userId) {
         log.info("Request searchText: {}", text);
-        if (text == null || text.isBlank()) {
-            return get("/search");
-        }
-        return get("/search?text=" + text);
+        return get("/search?text=" + text, userId);
     }
 
-    public ResponseEntity<Object> create(Integer userId, ItemDto itemDto) {
+    public ResponseEntity<Object> create(Integer userId, ItemDtoRequest itemDto) {
         log.info("Request create itemId={}, data: {}", userId, itemDto);
         return post("", userId, itemDto);
     }
 
-    public ResponseEntity<Object> update(Integer itemId, Integer userId, Map<String, Object> updates) {
-        log.info("Request update itemId={} userId={}, data: {}", itemId, userId, updates);
-        return patch("/" + itemId, userId, updates);
+    public ResponseEntity<Object> update(Integer itemId, Integer userId, ItemDtoRequest itemDto) {
+        log.info("Request update itemId={} userId={}, data: {}", itemId, userId, itemDto);
+        return patch("/" + itemId, userId, itemDto);
     }
 
-    public ResponseEntity<Object> addComment(Integer itemId, Integer userId, CommentRequestDto commentDto) {
+    public ResponseEntity<Object> addComment(Integer itemId, Integer userId, CommentDtoRequest commentDto) {
 
         log.info("Request addComment itemId={} userId=={}, text: {}",
                 itemId, userId, commentDto.getText());

@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import ru.practicum.common.user.UserDto;
+import ru.practicum.common.user.UserDtoNew;
 import ru.practicum.shareit.client.BaseClient;
 
 @Slf4j
@@ -37,12 +37,12 @@ public class UserClient extends BaseClient {
         return get("/" + id);
     }
 
-    public ResponseEntity<Object> create(UserDto userDto) {
+    public ResponseEntity<Object> create(UserDtoNew userDto) {
         log.info("Request create user data: {}", userDto);
         return post("", userDto);
     }
 
-    public ResponseEntity<Object> update(Integer userId, UserDto userDto) {
+    public ResponseEntity<Object> update(Integer userId, UserDtoNew userDto) {
         log.info("Request update user ID={}, data: {}", userId, userDto);
         return patch("/" + userId, userDto);
     }

@@ -1,317 +1,292 @@
 package ru.practicum.shareit.item;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.common.booking.BookingDto;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import ru.practicum.common.booking.BookingStatus;
 import ru.practicum.common.comment.CommentDto;
-import ru.practicum.common.comment.CommentRequestDto;
+import ru.practicum.common.comment.CommentDtoRequest;
 import ru.practicum.common.item.ItemDto;
+import ru.practicum.common.item.ItemDtoRequest;
+import ru.practicum.common.item.ItemDtoOwner;
+import ru.practicum.common.user.UserDto;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingLast;
+import ru.practicum.shareit.booking.model.BookingNext;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.item.comment.CommentMapper;
 import ru.practicum.shareit.item.comment.CommentRepository;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.UserRepository;
-import ru.practicum.shareit.validation.ValidationTool;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Service
-@RequiredArgsConstructor
+@Slf4j
+@Qualifier("ItemServiceImpl")
 @Transactional(readOnly = true)
 public class ItemServiceImpl implements ItemService {
 
-    private final ItemRepository repository;
+    private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
-    private final BookingMapper bookingMapper;
-    private final ItemMapper itemMapper;
-    private final CommentMapper commentMapper;
-    private static final String THIS_CLASS = "ItemService";
+    private final ItemRequestRepository itemRequestRepository;
 
-    @Override
-    @Transactional
-    public ItemDto create(ItemDto itemDto, Integer userId) {
-        log.info("ItemServiceImpl->create start");
-        log.info("itemDto={}, userId={}", itemDto, userId);
-
-        ValidationTool.checkId(userId, THIS_CLASS, "user_id must not be null when creating an item");
-
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("owner not found for id = " + userId));
-
-        validateItemFields(itemDto);
-
-        Item item = itemMapper.toEntity(itemDto);
-        item.setUserId(userId);
-
-        Item savedItem = repository.save(item);
-        log.info("Created item with ID: {} for user with ID: {}", savedItem.getId(), userId);
-
-        ItemDto savedItemDto = itemMapper.toDto(savedItem);
-        savedItemDto.setComments(Collections.emptyList());
-
-        log.info("ItemServiceImpl->create end");
-        return savedItemDto;
+    @Autowired
+    public ItemServiceImpl(ItemRepository itemRepository,
+                           UserRepository userRepository,
+                           BookingRepository bookingRepository,
+                           CommentRepository commentRepository,
+                           ItemRequestRepository itemRequestRepository) {
+        this.itemRepository = itemRepository;
+        this.userRepository = userRepository;
+        this.bookingRepository = bookingRepository;
+        this.commentRepository = commentRepository;
+        this.itemRequestRepository = itemRequestRepository;
     }
 
     @Override
     @Transactional
-    public ItemDto update(Integer id, ItemDto itemDto, Integer userId) {
-        log.info("ItemServiceImpl->update start");
-        log.info("id={}, itemDto={}, userId={}", id, itemDto, userId);
+    public CommentDto addComment(CommentDtoRequest commentDto, Integer userId, Integer itemId) {
+        log.info("ItemServiceImpl->addComment start");
+        Optional<Booking> booking = bookingRepository.findByBookerIdAndItemIdAndStatusAndEndBefore(userId, itemId, BookingStatus.APPROVED, LocalDateTime.now());
 
-        ValidationTool.checkId(id, THIS_CLASS, "Item cannot be updated with id = null");
-
-        Item existingItem = repository.findById(id).orElseThrow(
-                () -> new NotFoundException("Item with id = " + id + " not found")
-        );
-
-        if (!existingItem.getUserId().equals(userId)) {
-            throw new NotFoundException("Owner id =/= provided id");
+        if (booking.isEmpty()) {
+            String error = "Wrong time or wrong guy";
+            log.warn(error);
+            throw new ValidationException(error);
         }
 
-        itemMapper.updateItemFromDto(itemDto, existingItem);
-        existingItem.setId(id);
-
-        Item updatedItem = repository.save(existingItem);
-
-        ItemDto updatedItemDto = itemMapper.toDto(updatedItem);
-        updatedItemDto.setComments(getCommentsForItem(id));
-
-        log.info("ItemServiceImpl->update end");
-        return updatedItemDto;
+        Comment comment = CommentMapper.toComment(commentDto, booking.get().getBooker(), booking.get().getItem());
+        Comment commentResult = commentRepository.save(comment);
+        log.info("ItemServiceImpl->addComment end");
+        return CommentMapper.toCommentDto(commentResult);
     }
 
     @Override
-    public ItemDto getItemById(Integer id) {
-        log.info("ItemServiceImpl->getItemById start");
-        log.info("id={}", id);
+    @Transactional
+    public void deleteItem(Integer itemId, Integer userId) {
+        log.info("ItemServiceImpl->deleteItem start");
+        validateUser(userId);
+        Item item = validateItem(itemId, userId);
+        itemRepository.delete(item);
+        log.info("ItemServiceImpl->deleteItem end");
+    }
 
-        ValidationTool.checkId(id, THIS_CLASS, "Item cannot be found with id = null");
+    @Override
+    public List<ItemDtoOwner> getUserItems(Integer userId) {
+        log.info("ItemServiceImpl->getUserItems start");
+        validateUser(userId);
 
-        Item item = repository.findById(id).orElseThrow(
-                () -> new NotFoundException("Item with id = " + id + " not found")
-        );
+        List<ItemDtoOwner> itemOwnerDtoList = itemRepository.findByOwner_Id(userId).stream()
+                .filter(Objects::nonNull)
+                .map(ItemMapper::mapToItemOwnerDto)
+                .toList();
 
-        ItemDto itemDto = itemMapper.toDto(item);
-        itemDto.setComments(getCommentsForItem(id));
+        if (itemOwnerDtoList.isEmpty()) {
+            log.info("ItemServiceImpl->getUserItems end");
+            return List.of();
+        }
 
-        log.info("ItemServiceImpl->getItemById end");
+
+        List<Integer> itemIds = itemOwnerDtoList.stream()
+                .filter(Objects::nonNull)
+                .map(ItemDtoOwner::getId)
+                .collect(Collectors.toList());
+
+        List<ItemDtoOwner> itemOwnerDto = setBookingDates(itemOwnerDtoList,
+                bookingRepository.getBookingsByLast(itemIds, LocalDateTime.now(), BookingStatus.APPROVED),
+                bookingRepository.getBookingsByNext(itemIds, LocalDateTime.now(), BookingStatus.APPROVED));
+
+        List<Comment> comments = commentRepository.getCommentByAuthorIdAndItemId(itemIds);
+        List<ItemDtoOwner> itemOwnerDtoResult = setComments(itemOwnerDto, comments);
+
+        log.info("ItemServiceImpl->getUserItems end");
+
+        return itemOwnerDtoResult;
+    }
+
+    @Override
+    @Transactional
+    public ItemDto create(ItemDtoRequest newItemRequestDto, Integer userId) {
+        log.info("ItemServiceImpl->create start");
+        User user = validateUser(userId);
+        Item item = ItemMapper.mapToItem(newItemRequestDto);
+        item.setOwner(user);
+
+        if (newItemRequestDto.getRequestId() != null) {
+            ItemRequest request = itemRequestRepository.findById(newItemRequestDto.getRequestId())
+                    .orElseThrow(() -> new NotFoundException(
+                            String.format("Request with id=%d not found", newItemRequestDto.getRequestId())
+                    ));
+            item.setRequest(request);
+        }
+
+        Item itemResult = itemRepository.save(item);
+
+        log.info("DEBUG: Saved item with id={}, request_id={}",
+                itemResult.getId(),
+                itemResult.getRequest() != null ? itemResult.getRequest().getId() : "NULL");
+
+        return toItemDtoWithUser(itemResult, user);
+    }
+
+    @Override
+    @Transactional
+    public ItemDto update(ItemDtoRequest updateItemRequestDto, Integer itemId, Integer userId) {
+        log.info("ItemServiceImpl->update start");
+        User user = validateUser(userId);
+        Item item = validateItem(itemId, userId);
+        Item itemUpdate = ItemMapper.updateItemField(item, updateItemRequestDto);
+        Item itemResult = itemRepository.save(itemUpdate);
+        log.info("ItemServiceImpl->update end");
+
+        log.info("DEBUG: Updated item with id={}, request_id={}",
+                itemResult.getId(),
+                itemResult.getRequest() != null ? itemResult.getRequest().getId() : "NULL");
+
+        return toItemDtoWithUser(itemResult, user);
+    }
+
+    @Override
+    public ItemDto getById(Integer itemId, Integer userId) {
+        log.info("ItemServiceImpl->getById start");
+        Item item = itemRepository.findByWithOwner(itemId)
+                .orElseThrow(() -> new NotFoundException("Item with ID " + itemId + " not found"));
+        List<Comment> comments = commentRepository.getCommentByItemId(itemId);
+
+        ItemDto itemDto = ItemMapper.mapToItemDto(item);
+        itemDto.setOwner(UserMapper.mapToUserDto(item.getOwner()));
+        itemDto.setComments(comments.stream()
+                .filter(Objects::nonNull)
+                .map(CommentMapper::toCommentDto)
+                .collect(Collectors.toList()));
+
+        if (item.getOwner().getId().equals(userId)) {
+            List<Integer> itemIds = List.of(item.getId());
+            List<BookingLast> bookingLasts = bookingRepository
+                    .getBookingsByLast(itemIds, LocalDateTime.now(), BookingStatus.APPROVED);
+            List<BookingNext> bookingNexts = bookingRepository
+                    .getBookingsByNext(itemIds, LocalDateTime.now(), BookingStatus.APPROVED);
+
+            if (!bookingLasts.isEmpty()) {
+                itemDto.setLastBooking(BookingMapper.mapToBookingDto(bookingLasts.getFirst().getLastBooking()));
+            }
+
+            if (!bookingNexts.isEmpty()) {
+                itemDto.setNextBooking(BookingMapper.mapToBookingDto(bookingNexts.getFirst().getNextBooking()));
+            }
+        }
+
+        log.info("ItemServiceImpl->getById end");
         return itemDto;
     }
 
     @Override
-    public ItemDto getItemByIdWithDetails(Integer id, Integer userId) {
-        log.info("ItemServiceImpl->getItemByIdWithDetails start");
-        log.info("id={}, userId={}", id, userId);
-
-        ValidationTool.checkId(id, THIS_CLASS, "Item cannot be found with id = null");
-        ValidationTool.checkId(userId, THIS_CLASS, "User id cannot be null");
-
-        Item item = repository.findById(id).orElseThrow(
-                () -> new NotFoundException("Item with id = " + id + " not found")
-        );
-
-        LocalDateTime now = LocalDateTime.now();
-        BookingDto lastBooking = null;
-        BookingDto nextBooking = null;
-
-        if (item.getUserId().equals(userId)) {
-            lastBooking = bookingRepository
-                    .findLastBookingForItem(id, userId, now, PageRequest.of(0, 1))
-                    .stream()
-                    .findFirst()
-                    .map(bookingMapper::toDto)
-                    .orElse(null);
-
-            nextBooking = bookingRepository
-                    .findNextBookingForItem(id, now, PageRequest.of(0, 1))
-                    .stream()
-                    .findFirst()
-                    .map(bookingMapper::toDto)
-                    .orElse(null);
+    public List<ItemDto> getByText(String text, Integer userId) {
+        log.info("ItemServiceImpl->getByText start");
+        if (text == null || text.isBlank()) {
+            log.info("ItemServiceImpl->getByText end");
+            return new ArrayList<>();
         }
 
-        List<CommentDto> comments = getCommentsForItem(id);
-        ItemDto result = itemMapper.toDto(item, lastBooking, nextBooking, comments);
+        List<ItemDto> itemList = itemRepository.findByText(text.trim().toLowerCase(Locale.ROOT))
+                .stream()
+                .filter(Objects::nonNull)
+                .map(item -> toItemDtoWithUser(item, item.getOwner()))
+                .toList();
 
-        log.info("ItemServiceImpl->getItemByIdWithDetails end");
-        return result;
+        log.info("ItemServiceImpl->getByText end");
+        return itemList;
     }
 
-    @Override
-    public List<ItemDto> getAllItemsByUser(Integer userId) {
-        log.info("ItemServiceImpl->getAllItemsByUser start");
-        log.info("userId={}", userId);
-
-        ValidationTool.checkId(userId, THIS_CLASS, "Items cannot be found with user_id = null");
-
-        List<Item> items = repository.findAllByUserId(userId);
-        LocalDateTime now = LocalDateTime.now();
-
-        List<ItemDto> result = items.stream()
-                .map(item -> {
-                    BookingDto lastBooking = bookingRepository
-                            .findLastBookingForItem(item.getId(), userId, now, PageRequest.of(0, 1))
-                            .stream()
-                            .findFirst()
-                            .map(bookingMapper::toDto)
-                            .orElse(null);
-
-                    BookingDto nextBooking = bookingRepository
-                            .findNextBookingForItem(item.getId(), now, PageRequest.of(0, 1))
-                            .stream()
-                            .findFirst()
-                            .map(bookingMapper::toDto)
-                            .orElse(null);
-
-                    List<CommentDto> comments = getCommentsForItem(item.getId());
-
-                    return itemMapper.toDto(item, lastBooking, nextBooking, comments);
-                })
-                .collect(Collectors.toList());
-
-        log.info("ItemServiceImpl->getAllItemsByUser end");
-        return result;
+    private User validateUser(Integer userId) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty()) {
+            String error = String.format("User with ID: %d not found", userId);
+            log.warn(error);
+            throw new NotFoundException(error);
+        }
+        return optionalUser.get();
     }
 
-    @Override
-    public List<ItemDto> searchItem(String text, Integer userId) {
-        log.info("ItemServiceImpl->searchItem start");
-        log.info("text={}, userId={}", text, userId);
-
-        if (text == null || text.trim().isEmpty()) {
-            log.info("ItemServiceImpl->searchItem end");
-            return Collections.emptyList();
+    private Item validateItem(Integer itemId, Integer ownerId) {
+        Optional<Item> optionalItem = itemRepository.findById(itemId);
+        if (optionalItem.isEmpty()) {
+            String error = String.format("Item with ID: %d not found", itemId);
+            log.warn(error);
+            throw new NotFoundException(error);
         }
-        log.info("Searching items by text: '{}' for user {}", text, userId);
 
-        List<Item> items = repository.searchItem(text);
-
-        List<ItemDto> result = items.stream()
-                .map(item -> {
-                    ItemDto dto = itemMapper.toDto(item);
-                    dto.setComments(getCommentsForItem(item.getId()));
-                    return dto;
-                })
-                .collect(Collectors.toList());
-
-        log.info("ItemServiceImpl->searchItem end");
-        return result;
+        if (!optionalItem.get().getOwner().getId().equals(ownerId)) {
+            String error = "User is not the owner!";
+            log.error(error);
+            throw new ValidationException(error);
+        }
+        return optionalItem.get();
     }
 
-    @Override
-    @Transactional
-    public CommentDto addComment(Integer userId, Integer itemId, CommentRequestDto commentRequestDto) {
-        boolean hasPastBooking = false;
+    private ItemDto toItemDtoWithUser(Item item, User user) {
+        ItemDto itemDto = ItemMapper.mapToItemDto(item);
+        UserDto userDto = UserMapper.mapToUserDto(user);
+        itemDto.setOwner(userDto);
+        return itemDto;
+    }
 
-        log.info("ItemServiceImpl->addComment start");
-        log.info("userId={}, itemId={}, commentRequestDto={}", userId, itemId, commentRequestDto);
+    private List<ItemDtoOwner> setBookingDates(
+            List<ItemDtoOwner> ownerDto,
+            List<BookingLast> bookingLasts,
+            List<BookingNext> bookingNexts) {
+        Map<Integer, Booking> bookingLastsMap = bookingLasts.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(BookingLast::getId, BookingLast::getLastBooking));
 
-        if (commentRequestDto.getText() == null || commentRequestDto.getText().isBlank()) {
-            log.error("Comment text is empty");
-            throw new ValidationException("Comment text cannot be empty");
-        }
+        Map<Integer, Booking> bookingNextMap = bookingNexts.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(BookingNext::getId, BookingNext::getNextBooking));
 
-        User author = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User with ID " + userId + " not found"));
-        log.info("Author found: {} (ID={})", author.getName(), author.getId());
-
-        Item item = repository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Item with ID " + itemId + " not found"));
-        log.info("Item found: {} (ID={})", item.getName(), item.getId());
-
-        LocalDateTime now = LocalDateTime.now(); //Сервер живет в прошлом
-        log.info("Current time: {}", now);
-
-        List<Booking> approvedBookings = bookingRepository.findByUserIdAndItemIdAndStatus(
-                userId, itemId, BookingStatus.APPROVED);
-
-        log.info("APPROVED bookings for user {} for item {}: {}", userId, itemId, approvedBookings.size());
-
-        if (approvedBookings.isEmpty()) {
-            log.error("User {} has no APPROVED bookings for item {}", userId, itemId);
-            throw new ValidationException("Can only comment after an approved booking");
-        }
-
-        for (Booking booking : approvedBookings) {
-            boolean isPast = booking.getEndDate().isBefore(now);
-            log.info("Booking: ID={}, status={}, start={}, end={}, PAST? {}",
-                    booking.getId(), booking.getStatus(), booking.getStartDate(), booking.getEndDate(),
-                    isPast);
-
-            if (isPast) {
-                hasPastBooking = true;
-                log.info("Found PAST (completed) booking with ID={}", booking.getId());
-            } else {
-                log.info("Found ACTIVE booking with ID={}", booking.getId());
+        for (ItemDtoOwner ownerDtoItem : ownerDto) {
+            if (bookingLastsMap.containsKey(ownerDtoItem.getId())) {
+                ownerDtoItem.setLastBooking(BookingMapper.mapToBookingDto(bookingLastsMap.get(ownerDtoItem.getId())));
+            }
+            if (bookingNextMap.containsKey(ownerDtoItem.getId())) {
+                ownerDtoItem.setNextBooking(BookingMapper.mapToBookingDto(bookingNextMap.get(ownerDtoItem.getId())));
             }
         }
-
-        if (hasPastBooking) {
-            log.info("Past booking found - creating comment");
-
-            Comment comment = Comment.builder()
-                    .text(commentRequestDto.getText())
-                    .itemId(itemId)
-                    .userId(userId)
-                    .created(Instant.now())
-                    .build();
-
-            Comment savedComment = commentRepository.save(comment);
-            log.info("Comment saved with ID: {}", savedComment.getId());
-
-            CommentDto savedCommentDto = commentMapper.toDto(savedComment);
-            savedCommentDto.setAuthorName(author.getName());
-
-            log.info("Added comment: {}", savedCommentDto);
-
-            log.info("ItemServiceImpl->addComment end");
-            return savedCommentDto;
-        }
-
-        log.error("User {} has only active APPROVED bookings for item {}", userId, itemId);
-        throw new ValidationException("Cannot create comment before the booking is finished");
-
+        return ownerDto;
     }
 
-    private List<CommentDto> getCommentsForItem(Integer itemId) {
-        List<Comment> comments = commentRepository.findByItemId(itemId);
+    private List<ItemDtoOwner> setComments(List<ItemDtoOwner> itemOwnerDtos, List<Comment> comments) {
+        if (comments == null || comments.isEmpty()) {
+            return itemOwnerDtos;
+        }
 
-        return comments.stream()
-                .map(comment -> {
-                    CommentDto dto = commentMapper.toDto(comment);
-                    userRepository.findById(comment.getUserId())
-                            .ifPresent(author -> dto.setAuthorName(author.getName()));
-                    return dto;
-                })
-                .collect(Collectors.toList());
-    }
+        Map<Integer, List<Comment>> commentsMap = comments.stream()
+                .collect(Collectors.groupingBy(comment -> comment.getItem().getId()));
 
-    private void validateItemFields(ItemDto itemDto) {
-        if (itemDto.getName() == null || itemDto.getName().isBlank()) {
-            throw new ValidationException("Item name cannot be empty");
+        for (ItemDtoOwner ownerDtoItem : itemOwnerDtos) {
+            List<Comment> itemComments = commentsMap.get(ownerDtoItem.getId());
+            if (itemComments != null) {
+                ownerDtoItem.setComments(itemComments.stream()
+                        .filter(Objects::nonNull)
+                        .map(CommentMapper::toCommentDto)
+                        .collect(Collectors.toList()));
+            } else {
+                ownerDtoItem.setComments(List.of());
+            }
         }
-        if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
-            throw new ValidationException("Item description cannot be empty");
-        }
-        if (itemDto.getAvailable() == null) {
-            throw new ValidationException("Item status cannot be empty");
-        }
+        return itemOwnerDtos;
     }
 }

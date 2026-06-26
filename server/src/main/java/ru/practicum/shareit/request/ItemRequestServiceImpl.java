@@ -2,21 +2,22 @@ package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.common.item.ItemResponseDto;
+import ru.practicum.common.item.ItemDtoResponse;
 import ru.practicum.common.request.ItemRequestDto;
+import ru.practicum.common.request.ItemRequestDtoResponse;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+
 
 @Slf4j
 @Service
@@ -30,14 +31,11 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final ItemRequestMapper itemRequestMapper;
 
     @Override
-    public ItemRequestDto getRequestById(Integer userId, Integer requestId) {
+    public ItemRequestDtoResponse getRequestById(Integer userId, Integer requestId) {
         log.info("ItemRequestServiceImpl->getRequestById start");
         log.info("userId={}, requestId={}", userId, requestId);
 
         log.info("Fetching item request with id={}", requestId);
-
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found!"));
 
         ItemRequest request = itemRequestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Request not found"));
@@ -45,8 +43,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<Item> relatedItems = itemRepository.findByRequestId(requestId);
         log.info("Found {} items related to request id={}", relatedItems.size(), requestId);
 
-        List<ItemResponseDto> itemResponseDtos = getItemResponses(relatedItems);
-        ItemRequestDto result = itemRequestMapper.toItemRequestDtoWithItems(request, itemResponseDtos);
+        List<ItemDtoResponse> itemDtoResponses = getItemResponses(relatedItems);
+        ItemRequestDtoResponse result = itemRequestMapper.toItemRequestDtoWithItems(request, itemDtoResponses);
         log.info("Received item request: {}", result);
 
         log.info("ItemRequestServiceImpl->getRequestById end");
@@ -54,7 +52,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public List<ItemRequestDto> getUserRequests(Integer userId) {
+    public List<ItemRequestDtoResponse> getUserRequests(Integer userId) {
         log.info("ItemRequestServiceImpl->getUserRequests start");
         log.info("userId={}", userId);
 
@@ -62,10 +60,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<ItemRequest> requests = itemRequestRepository.findByRequesterIdOrderByCreatedDesc(userId);
         log.info("Found {} requests for user with id={}", requests.size(), userId);
 
-        List<ItemRequestDto> result = requests.stream()
+        List<ItemRequestDtoResponse> result = requests.stream()
                 .map(request -> {
-                    List<ItemResponseDto> answers = getItemResponses(itemRepository.findByRequestId(request.getId()));
-                    ItemRequestDto requestDto = itemRequestMapper.toItemRequestDtoWithItems(request, answers);
+                    List<ItemDtoResponse> answers = getItemResponses(itemRepository.findByRequestId(request.getId()));
+                    ItemRequestDtoResponse requestDto = itemRequestMapper.toItemRequestDtoWithItems(request, answers);
                     log.info("Processed request with id={}", request.getId());
                     return requestDto;
                 })
@@ -76,26 +74,26 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public List<ItemRequestDto> getAllRequests(Integer userId, Integer from, Integer size) {
+    public List<ItemRequestDtoResponse> getAllRequests(Integer userId) {
         log.info("ItemRequestServiceImpl->getAllRequests start");
-        log.info("userId={}, from={}, size={}", userId, from, size);
+        log.info("userId={}", userId);
 
-        log.info("Fetching all requests except for user with id={}, from {} size {}", userId, from, size);
-        Pageable pageable = PageRequest.of(from / size, size);
-        List<ItemRequest> requests = itemRequestRepository.findByRequesterIdNotOrderByCreatedDesc(userId, pageable);
+        log.info("Fetching all requests except for user with id={}", userId);
+
+        List<ItemRequest> requests = itemRequestRepository.findByRequesterIdNotOrderByCreatedDesc(userId);
         log.info("Found {} requests", requests.size());
 
-        List<ItemRequestDto> result = requests.stream()
+        List<ItemRequestDtoResponse> result = requests.stream()
                 .map(request -> {
-                    List<ItemResponseDto> answers = itemRepository.findByRequestId(request.getId())
+                    List<ItemDtoResponse> answers = itemRepository.findByRequestId(request.getId())
                             .stream()
-                            .map(item -> new ItemResponseDto(
+                            .map(item -> new ItemDtoResponse(
                                     item.getId(),
                                     item.getName(),
-                                    item.getUserId()
+                                    UserMapper.mapToUserDto(item.getOwner())
                             ))
                             .collect(Collectors.toList());
-                    ItemRequestDto requestDto = itemRequestMapper.toItemRequestDtoWithItems(request, answers);
+                    ItemRequestDtoResponse requestDto = itemRequestMapper.toItemRequestDtoWithItems(request, answers);
                     log.info("Processed request with id={}", request.getId());
                     return requestDto;
                 })
@@ -107,38 +105,45 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     @Transactional
-    public ItemRequestDto createRequest(Integer userId, ItemRequestDto itemRequestDto) {
+    public ItemRequestDtoResponse createRequest(Integer userId, ItemRequestDto itemRequestDto) {
         log.info("ItemRequestServiceImpl->createRequest start");
         log.info("userId={}, itemRequestDto={}", userId, itemRequestDto);
 
         log.info("Creating new item request from user with id={}", userId);
         ItemRequest request = itemRequestMapper.toItemRequest(itemRequestDto);
 
-        User owner = userRepository.findById(userId)
+
+        User requestor = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found!"));
 
-        request.setUserId(owner.getId());
-        request.setCreated(LocalDateTime.now());
-        ItemRequest savedRequest = itemRequestRepository.save(request);
-        log.info("Created item request with id={}", savedRequest.getId());
+        request.setRequestor(requestor);
 
-        ItemRequestDto result = itemRequestMapper.toItemRequestDtoWithItems(savedRequest, List.of());
+        request.setCreated(LocalDateTime.now());
+
+        ItemRequest savedRequest = itemRequestRepository.save(request);
+
+        log.info("DEBUG: Created request_id={}, user_id={}", savedRequest.getId(), savedRequest.getRequestor().getId());
+
+        List<Item> items = itemRepository.findByRequestId(savedRequest.getId());
+        log.info("DEBUG: {} items", items.size());
+
+        ItemRequestDtoResponse result = itemRequestMapper.toItemRequestDtoWithItems(savedRequest, List.of());
 
         log.info("ItemRequestServiceImpl->createRequest end");
         return result;
     }
 
-    private List<ItemResponseDto> getItemResponses(List<Item> relatedItems) {
+    private List<ItemDtoResponse> getItemResponses(List<Item> relatedItems) {
         log.info("Forming list of responses for {} items", relatedItems.size());
         return relatedItems.stream()
                 .map(item -> {
-                    ItemResponseDto itemResponseDto = new ItemResponseDto(
+                    ItemDtoResponse itemDtoResponse = new ItemDtoResponse(
                             item.getId(),
                             item.getName(),
-                            item.getUserId()
+                            UserMapper.mapToUserDto(item.getOwner())
                     );
                     log.debug("Created response for item with id={}", item.getId());
-                    return itemResponseDto;
+                    return itemDtoResponse;
                 })
                 .collect(Collectors.toList());
     }
