@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,4 +28,6 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
 
     List<Item> findByRequestId(Integer requestId);
 
+    @Query("SELECT i FROM Item i JOIN FETCH i.owner WHERE i.request.id IN :requestIds")
+    List<Item> findByRequestIdInFetchOwner(@Param("requestIds") Collection<Integer> requestIds);
 }

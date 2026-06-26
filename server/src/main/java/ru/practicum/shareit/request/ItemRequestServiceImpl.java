@@ -15,7 +15,9 @@ import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -56,13 +58,30 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         log.info("ItemRequestServiceImpl->getUserRequests start");
         log.info("userId={}", userId);
 
-        log.info("Fetching all requests for user with id={}", userId);
+        // 1 запрос к БД
         List<ItemRequest> requests = itemRequestRepository.findByRequesterIdOrderByCreatedDesc(userId);
-        log.info("Found {} requests for user with id={}", requests.size(), userId);
+        log.info("Found {} requests", requests.size());
+
+        if (requests.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Integer> requestIds = requests.stream()
+                .map(ItemRequest::getId)
+                .collect(Collectors.toList());
+
+        //1 запрос к БД
+        List<Item> items = itemRepository.findByRequestIdInFetchOwner(requestIds);
+
+        Map<Integer, List<Item>> itemsByRequest = items.stream()
+                .collect(Collectors.groupingBy(item -> item.getRequest().getId()));
 
         List<ItemRequestDtoResponse> result = requests.stream()
                 .map(request -> {
-                    List<ItemDtoResponse> answers = getItemResponses(itemRepository.findByRequestId(request.getId()));
+                    List<Item> relatedItems = itemsByRequest.getOrDefault(request.getId(), Collections.emptyList());
+
+                    List<ItemDtoResponse> answers = getItemResponses(relatedItems);
+
                     ItemRequestDtoResponse requestDto = itemRequestMapper.toItemRequestDtoWithItems(request, answers);
                     log.info("Processed request with id={}", request.getId());
                     return requestDto;
@@ -78,21 +97,30 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         log.info("ItemRequestServiceImpl->getAllRequests start");
         log.info("userId={}", userId);
 
-        log.info("Fetching all requests except for user with id={}", userId);
-
+        // 1 запрос к БД
         List<ItemRequest> requests = itemRequestRepository.findByRequesterIdNotOrderByCreatedDesc(userId);
         log.info("Found {} requests", requests.size());
 
+        if (requests.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Integer> requestIds = requests.stream()
+                .map(ItemRequest::getId)
+                .collect(Collectors.toList());
+
+        //1 запрос к БД
+        List<Item> items = itemRepository.findByRequestIdInFetchOwner(requestIds);
+
+        Map<Integer, List<Item>> itemsByRequest = items.stream()
+                .collect(Collectors.groupingBy(item -> item.getRequest().getId()));
+
         List<ItemRequestDtoResponse> result = requests.stream()
                 .map(request -> {
-                    List<ItemDtoResponse> answers = itemRepository.findByRequestId(request.getId())
-                            .stream()
-                            .map(item -> new ItemDtoResponse(
-                                    item.getId(),
-                                    item.getName(),
-                                    UserMapper.mapToUserDto(item.getOwner())
-                            ))
-                            .collect(Collectors.toList());
+                    List<Item> relatedItems = itemsByRequest.getOrDefault(request.getId(), Collections.emptyList());
+
+                    List<ItemDtoResponse> answers = getItemResponses(relatedItems);
+
                     ItemRequestDtoResponse requestDto = itemRequestMapper.toItemRequestDtoWithItems(request, answers);
                     log.info("Processed request with id={}", request.getId());
                     return requestDto;

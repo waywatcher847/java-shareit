@@ -7,8 +7,9 @@ import ru.practicum.common.item.ItemDtoResponse;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
 @Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
