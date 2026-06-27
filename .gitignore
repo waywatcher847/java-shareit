@@ -3,6 +3,7 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+compose.yaml
 
 ### STS ###
 .apt_generated
@@ -14,10 +15,13 @@ target/
 .sts4-cache
 
 ### IntelliJ IDEA ###
+*.class
+*.jar
 .idea
 *.iws
 *.iml
 *.ipr
+.DS_Store
 
 ### NetBeans ###
 /nbproject/private/
@@ -31,3 +35,15 @@ build/
 
 ### VS Code ###
 .vscode/
+/postman/
+/volumes/
+/src/
+/db/
+
+### Logs and Databases ###
+*.log
+*.db
+
+### Maven Wrapper ###
+mvnw
+mvnw.cmd
