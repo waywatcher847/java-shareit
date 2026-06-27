@@ -10,7 +10,6 @@ import ru.practicum.common.booking.BookingState;
 import ru.practicum.common.booking.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.ConflictException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.validation.ValidationService;
