@@ -10,8 +10,10 @@ import ru.practicum.common.booking.BookingState;
 import ru.practicum.common.booking.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.ConflictException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.validation.ValidationService;
 
 import java.time.LocalDateTime;
@@ -25,6 +27,7 @@ import java.util.Objects;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
+    private final UserRepository userRepository;
     private final ValidationService validationService;
 
     @Override
@@ -59,7 +62,9 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto approve(Integer bookingId, Integer userId, Boolean approved) {
         log.info("BookingServiceImpl->approve start, bookingId={}, userId={}, approved={}", bookingId, userId, approved);
 
-        User user = validationService.validateUserExists(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ValidationException("User with ID: " + userId + " not found"));
+
         Booking booking = validationService.validateBookingExists(bookingId);
 
         if (booking.getItem().getOwner().equals(user)) {
