@@ -17,7 +17,7 @@ public class ItemDtoRequest {
     @NotBlank(groups = ItemDtoRequest.Create.class, message = "Name is mandatory")
     private String name;
     @NotBlank(groups = ItemDtoRequest.Create.class, message = "description is mandatory")
-    @Size(max = 200, message = "Description max length os 200")
+    @Size(groups = ItemDtoRequest.Create.class, max = 200, message = "Description max length os 200")
     private String description;
     @NotNull(groups = ItemDtoRequest.Create.class, message = "available is mandatory")
     private Boolean available;

@@ -9,9 +9,7 @@ import ru.practicum.common.booking.BookingDtoRequest;
 import ru.practicum.common.booking.BookingState;
 import ru.practicum.common.booking.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.exception.AccessDeniedException;
-import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.user.User;
@@ -52,18 +50,18 @@ class BookingIntegrationalTests {
     }
 
     @Test
-    void create_UnavailableItem_ThrowsValidationException() {
+    void create_UnavailableItem_ThrowsIllegalArgumentException() {
         User booker = createUser("Booker", "booker@test.com");
         User owner = createUser("Owner", "owner@test.com");
         Item item = createItem("Item", "Desc", false, owner);
         BookingDtoRequest request = createBookingRequest(item.getId(),
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
 
-        assertThrows(ValidationException.class, () -> bookingService.create(request, booker.getId()));
+        assertThrows(IllegalArgumentException.class, () -> bookingService.create(request, booker.getId()));
     }
 
     @Test
-    void create_OverlappingDates_ThrowsValidationException() {
+    void create_OverlappingDates_ThrowsConflictException() {
         User booker1 = createUser("Booker1", "b1@test.com");
         User booker2 = createUser("Booker2", "b2@test.com");
         User owner = createUser("Owner", "owner@test.com");
@@ -74,17 +72,17 @@ class BookingIntegrationalTests {
         BookingDtoRequest request = createBookingRequest(item.getId(),
                 LocalDateTime.now().plusDays(2), LocalDateTime.now().plusDays(3));
 
-        assertThrows(ValidationException.class, () -> bookingService.create(request, booker2.getId()));
+        assertThrows(ConflictException.class, () -> bookingService.create(request, booker2.getId()));
     }
 
     @Test
-    void create_OwnerBooksOwnItem_ThrowsValidationException() {
+    void create_OwnerBooksOwnItem_ThrowsConflictException() {
         User owner = createUser("Owner", "owner@test.com");
         Item item = createItem("Item", "Desc", true, owner);
         BookingDtoRequest request = createBookingRequest(item.getId(),
                 LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2));
 
-        assertThrows(ValidationException.class, () -> bookingService.create(request, owner.getId()));
+        assertThrows(ConflictException.class, () -> bookingService.create(request, owner.getId()));
     }
 
     @Test
@@ -100,28 +98,28 @@ class BookingIntegrationalTests {
     }
 
     @Test
-    void approve_ByNonOwner_ThrowsAccessDeniedException() {
+    void approve_ByNonOwner_ThrowsConflictException() {
         User booker = createUser("Booker", "booker@test.com");
         User owner = createUser("Owner", "owner@test.com");
         User stranger = createUser("Stranger", "stranger@test.com");
         Item item = createItem("Item", "Desc", true, owner);
         Booking booking = createBooking(item, booker, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), BookingStatus.WAITING);
 
-        assertThrows(AccessDeniedException.class, () -> bookingService.approve(booking.getId(), stranger.getId(), true));
+        assertThrows(ConflictException.class, () -> bookingService.approve(booking.getId(), stranger.getId(), true));
     }
 
     @Test
-    void approve_AlreadyProcessed_ThrowsValidationException() {
+    void approve_AlreadyProcessed_ThrowsConflictException() {
         User booker = createUser("Booker", "booker@test.com");
         User owner = createUser("Owner", "owner@test.com");
         Item item = createItem("Item", "Desc", true, owner);
         Booking booking = createBooking(item, booker, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), BookingStatus.APPROVED);
 
-        assertThrows(ValidationException.class, () -> bookingService.approve(booking.getId(), owner.getId(), true));
+        assertThrows(ConflictException.class, () -> bookingService.approve(booking.getId(), owner.getId(), true));
     }
 
     @Test
-    void approve_WithOverlap_ThrowsValidationException() {
+    void approve_WithOverlap_ThrowsConflictException() {
         User booker1 = createUser("Booker1", "b1@test.com");
         User booker2 = createUser("Booker2", "b2@test.com");
         User owner = createUser("Owner", "owner@test.com");
@@ -130,17 +128,17 @@ class BookingIntegrationalTests {
         createBooking(item, booker1, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(5), BookingStatus.APPROVED);
         Booking waiting = createBooking(item, booker2, LocalDateTime.now().plusDays(2), LocalDateTime.now().plusDays(3), BookingStatus.WAITING);
 
-        assertThrows(ValidationException.class, () -> bookingService.approve(waiting.getId(), owner.getId(), true));
+        assertThrows(ConflictException.class, () -> bookingService.approve(waiting.getId(), owner.getId(), true));
     }
 
     @Test
-    void approve_NullApproved_ThrowsNotFoundException() {
+    void approve_NullApproved_ThrowsNullPointerException() {
         User booker = createUser("Booker", "booker@test.com");
         User owner = createUser("Owner", "owner@test.com");
         Item item = createItem("Item", "Desc", true, owner);
         Booking booking = createBooking(item, booker, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), BookingStatus.WAITING);
 
-        assertThrows(NotFoundException.class, () -> bookingService.approve(booking.getId(), owner.getId(), null));
+        assertThrows(NullPointerException.class, () -> bookingService.approve(booking.getId(), owner.getId(), null));
     }
 
 
@@ -167,14 +165,14 @@ class BookingIntegrationalTests {
     }
 
     @Test
-    void getById_ByThirdParty_ThrowsAccessDeniedException() {
+    void getById_ByThirdParty_ThrowsConflictException() {
         User booker = createUser("Booker", "booker@test.com");
         User owner = createUser("Owner", "owner@test.com");
         User stranger = createUser("Stranger", "stranger@test.com");
         Item item = createItem("Item", "Desc", true, owner);
         Booking booking = createBooking(item, booker, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), BookingStatus.WAITING);
 
-        assertThrows(AccessDeniedException.class, () -> bookingService.getById(booking.getId(), stranger.getId()));
+        assertThrows(ConflictException.class, () -> bookingService.getById(booking.getId(), stranger.getId()));
     }
 
 

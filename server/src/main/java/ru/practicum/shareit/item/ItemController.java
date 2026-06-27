@@ -24,9 +24,9 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public ResponseEntity<ItemDto> create(@Valid @RequestBody ItemDtoRequest itemDto,
+    public ResponseEntity<ItemDto> create(@RequestBody ItemDtoRequest itemDto,
                                           @RequestHeader(Constants.USER_ID_HEADER) Integer userId) {
-        log.info("Server: POST /items, userId={}, itemDto={}", userId, itemDto);
+        log.info("POST /items, userId={}, itemDto={}", userId, itemDto);
         ItemDto createdItem = itemService.create(itemDto, userId);
         return ResponseEntity
                 .created(URI.create("/items/" + createdItem.getId()))
@@ -37,7 +37,7 @@ public class ItemController {
     public ResponseEntity<ItemDto> update(@PathVariable Integer id,
                                           @RequestBody ItemDtoRequest itemDto,
                                           @RequestHeader(Constants.USER_ID_HEADER) Integer userId) {
-        log.info("Server: PATCH /items/{}, userId={}, itemDto={}", id, userId, itemDto);
+        log.info("PATCH /items/{}, userId={}, itemDto={}", id, userId, itemDto);
         ItemDto updatedItem = itemService.update(itemDto, id, userId);
         return ResponseEntity.ok(updatedItem);
     }
@@ -45,14 +45,14 @@ public class ItemController {
     @GetMapping("/{id}")
     public ResponseEntity<ItemDto> getItemById(@PathVariable Integer id,
                                                @RequestHeader(Constants.USER_ID_HEADER) Integer userId) {
-        log.info("Server: GET /items/{}, userId={}", id, userId);
+        log.info("GET /items/{}, userId={}", id, userId);
         ItemDto item = itemService.getById(id, userId);
         return ResponseEntity.ok(item);
     }
 
     @GetMapping
     public ResponseEntity<List<ItemDtoOwner>> getAllItemsByUser(@RequestHeader(Constants.USER_ID_HEADER) Integer userId) {
-        log.info("Server: GET /items, userId={}", userId);
+        log.info("GET /items, userId={}", userId);
         List<ItemDtoOwner> items = itemService.getUserItems(userId);
         return ResponseEntity.ok(items);
     }
@@ -60,7 +60,7 @@ public class ItemController {
     @GetMapping("/search")
     public ResponseEntity<List<ItemDto>> searchItem(@RequestParam String text,
                                                     @RequestHeader(Constants.USER_ID_HEADER) Integer userId) {
-        log.info("Server: GET /items/search, text='{}', userId={}", text, userId);
+        log.info("GET /items/search, text='{}', userId={}", text, userId);
         List<ItemDto> items = itemService.getByText(text, userId);
         return ResponseEntity.ok(items);
     }
@@ -70,7 +70,7 @@ public class ItemController {
             @PathVariable Integer itemId,
             @RequestHeader(Constants.USER_ID_HEADER) Integer userId,
             @RequestBody @Valid CommentDtoRequest commentDtoRequest) {
-        log.info("Server: POST /items/{}/comment, userId={}, comment={}", itemId, userId, commentDtoRequest);
+        log.info("POST /items/{}/comment, userId={}, comment={}", itemId, userId, commentDtoRequest);
         CommentDto comment = itemService.addComment(commentDtoRequest, userId, itemId);
         return ResponseEntity.ok(comment);
     }

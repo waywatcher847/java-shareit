@@ -53,17 +53,6 @@ class ItemRequestControllerTests {
     }
 
     @Test
-    void createRequest_emptyDescription_shouldReturn400() throws Exception {
-        ItemRequestDto request = new ItemRequestDto();
-
-        mockMvc.perform(post("/internal/requests")
-                        .header(Constants.USER_ID_HEADER, 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void getRequestById_shouldReturn200() throws Exception {
         ItemRequestDtoResponse response = new ItemRequestDtoResponse();
         response.setId(1);

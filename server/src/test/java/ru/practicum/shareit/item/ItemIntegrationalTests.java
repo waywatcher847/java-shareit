@@ -11,6 +11,7 @@ import ru.practicum.common.item.ItemDtoOwner;
 import ru.practicum.common.item.ItemDtoRequest;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.comment.Comment;
@@ -121,13 +122,13 @@ class ItemIntegrationalTests {
     }
 
     @Test
-    void update_NotOwner_ThrowsValidationException() {
+    void update_NotOwner_AccessDeniedException() {
         User owner = createUser("Owner", "owner@test.com");
         User other = createUser("Other", "other@test.com");
         Item item = createItem("Name", "Desc", true, owner);
         ItemDtoRequest updateDto = ItemDtoRequest.builder().name("NewName").build();
 
-        assertThrows(ValidationException.class, () -> itemService.update(updateDto, item.getId(), other.getId()));
+        assertThrows(AccessDeniedException.class, () -> itemService.update(updateDto, item.getId(), other.getId()));
     }
 
     @Test
@@ -200,12 +201,12 @@ class ItemIntegrationalTests {
     }
 
     @Test
-    void deleteItem_NotOwner_ThrowsValidationException() {
+    void deleteItem_NotOwner_AccessDeniedException() {
         User owner = createUser("Owner", "owner@test.com");
         User other = createUser("Other", "other@test.com");
         Item item = createItem("Item", "Desc", true, owner);
 
-        assertThrows(ValidationException.class, () -> itemService.deleteItem(item.getId(), other.getId()));
+        assertThrows(AccessDeniedException.class, () -> itemService.deleteItem(item.getId(), other.getId()));
     }
 
     @Test
@@ -267,7 +268,7 @@ class ItemIntegrationalTests {
 
     private Comment createComment(String text, User author, Item item) {
         return commentRepository.save(Comment.builder()
-                .text(text)
+                .content(text)
                 .author(author)
                 .item(item)
                 .created(LocalDateTime.now())

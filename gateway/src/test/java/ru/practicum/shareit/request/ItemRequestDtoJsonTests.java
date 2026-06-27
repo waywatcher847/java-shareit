@@ -1,4 +1,4 @@
-package ru.practicum.shareit.json;
+package ru.practicum.shareit.request;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -52,7 +52,7 @@ public class ItemRequestDtoJsonTests {
         assertThat(violations2).hasSize(1);
         assertThat(violations2).extracting(ConstraintViolation::getMessage).contains("description is mandatory");
 
-        String invalidJson3 =  "{\n" +
+        String invalidJson3 = "{\n" +
                 "                    }";
 
         ItemRequestDto itemRequestDto3 = json.parseObject(invalidJson3);

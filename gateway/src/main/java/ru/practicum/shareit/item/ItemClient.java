@@ -28,33 +28,32 @@ public class ItemClient extends BaseClient {
     }
 
     public ResponseEntity<Object> getItemById(Integer itemId) {
-        log.info("Request getItemById ID={}", itemId);
+        log.info("getItemById ID={}", itemId);
         return get("/" + itemId);
     }
 
     public ResponseEntity<Object> getItemByUserId(Integer userId) {
-        log.info("Request getItemByUserId ID={}", userId);
+        log.info("getItemByUserId ID={}", userId);
         return get("", userId);
     }
 
     public ResponseEntity<Object> searchText(String text, Integer userId) {
-        log.info("Request searchText: {}", text);
+        log.info("searchText: {}", text);
         return get("/search?text=" + text, userId);
     }
 
     public ResponseEntity<Object> create(Integer userId, ItemDtoRequest itemDto) {
-        log.info("Request create itemId={}, data: {}", userId, itemDto);
+        log.info("create userId={}, data: {}", userId, itemDto);
         return post("", userId, itemDto);
     }
 
     public ResponseEntity<Object> update(Integer itemId, Integer userId, ItemDtoRequest itemDto) {
-        log.info("Request update itemId={} userId={}, data: {}", itemId, userId, itemDto);
+        log.info("update itemId={} userId={}, data: {}", itemId, userId, itemDto);
         return patch("/" + itemId, userId, itemDto);
     }
 
     public ResponseEntity<Object> addComment(Integer itemId, Integer userId, CommentDtoRequest commentDto) {
-
-        log.info("Request addComment itemId={} userId=={}, text: {}",
+        log.info("addComment itemId={} userId=={}, text: {}",
                 itemId, userId, commentDto.getText());
         return post("/" + itemId + "/comment", userId, commentDto);
 
@@ -65,7 +64,7 @@ public class ItemClient extends BaseClient {
     }
 
     public ResponseEntity<Object> getItemDtoWithBookingsAndComments(Integer itemId, Integer userId) {
-        log.info("Request с ID={} userId={}", itemId, userId);
+        log.info("с ID={} userId={}", itemId, userId);
 
         return getWithHeaders("/" + itemId, userId);
     }

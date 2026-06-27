@@ -1,6 +1,5 @@
 package ru.practicum.shareit.request;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,14 +22,14 @@ public class ItemRequestController {
     @ResponseStatus(HttpStatus.OK)
     public ItemRequestDtoResponse getRequestById(@RequestHeader(Constants.USER_ID_HEADER) Integer userId,
                                          @PathVariable Integer requestId) {
-        log.info("Server: GET /requests/{}, userId={}", requestId, userId);
+        log.info("GET /requests/{}, userId={}", requestId, userId);
         return requestService.getRequestById(userId, requestId);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<ItemRequestDtoResponse> getUserRequests(@RequestHeader(Constants.USER_ID_HEADER) Integer userId) {
-        log.info("Server: GET /requests, userId={}", userId);
+        log.info("GET /requests, userId={}", userId);
         return requestService.getUserRequests(userId);
     }
 
@@ -38,15 +37,15 @@ public class ItemRequestController {
     @ResponseStatus(HttpStatus.OK)
     public List<ItemRequestDtoResponse> getAllRequests(
             @RequestHeader(Constants.USER_ID_HEADER) Integer userId) {
-        log.info("Server: GET /requests/all, userId={}", userId);
+        log.info("GET /requests/all, userId={}", userId);
         return requestService.getAllRequests(userId);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ItemRequestDtoResponse createRequest(@RequestHeader(Constants.USER_ID_HEADER) Integer userId,
-                                        @RequestBody @Valid ItemRequestDto itemRequestDto) {
-        log.info("Server: POST /requests, userId={}, itemRequestDto={}", userId, itemRequestDto);
+                                        @RequestBody ItemRequestDto itemRequestDto) {
+        log.info("POST /requests, userId={}, itemRequestDto={}", userId, itemRequestDto);
         return requestService.createRequest(userId, itemRequestDto);
     }
 }

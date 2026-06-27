@@ -1,4 +1,4 @@
-package ru.practicum.shareit.json;
+package ru.practicum.shareit.user;
 
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;

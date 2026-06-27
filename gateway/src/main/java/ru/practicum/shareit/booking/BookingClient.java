@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking;
 
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -13,6 +14,7 @@ import ru.practicum.common.booking.BookingDtoRequest;
 import ru.practicum.common.booking.BookingState;
 import ru.practicum.shareit.client.BaseClient;
 
+@Slf4j
 @Service
 public class BookingClient extends BaseClient {
 
@@ -29,29 +31,35 @@ public class BookingClient extends BaseClient {
     }
 
     public ResponseEntity<Object> createBooking(BookingDtoRequest bookingDtoRequest, Integer userId) {
+        log.info("createBooking userId={}, data: {}", userId, bookingDtoRequest);
         return post("", userId, bookingDtoRequest);
     }
 
     public ResponseEntity<Object> approveBooking(Integer bookingId, Boolean approved, Integer userId) {
+        log.info("approveBooking approved={} userId={}, bookingId: {}", approved, userId, bookingId);
         Map<String, Object> parameters = Map.of("approved", approved);
         return patch("/" + bookingId + "?approved={approved}", userId, parameters, null);
     }
 
     public ResponseEntity<Object> getBookingById(Integer bookingId, Integer userId) {
+        log.info("getBookingById bookingId={} userId={}", bookingId, userId);
         return get("/" + bookingId, userId);
     }
 
     public ResponseEntity<Object> getUserBookings(Integer userId, BookingState state) {
         Map<String, Object> params = Map.of("state", state);
-        return get("", userId, params);
+        log.info("getUserBookings userId={}, state: {}", userId, state);
+        return get("?state={state}", userId, params);
     }
 
     public ResponseEntity<Object> getOwnerBookings(Integer ownerId, BookingState state) {
         Map<String, Object> params = Map.of("state", state);
-        return get("/owner", ownerId, params);
+        log.info("getOwnerBookings ownerId={}, state: {}", ownerId, state);
+        return get("/owner?state={state}", ownerId, params);
     }
 
     public ResponseEntity<Object> deleteBooking(Integer userId, Integer bookingId) {
+        log.info("deleteBooking userId={} bookingId={}", userId, userId, bookingId);
         return delete("/" + bookingId, userId);
     }
 }

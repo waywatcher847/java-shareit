@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,8 +25,8 @@ public class BookingController {
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<BookingDto> createBooking(
             @RequestHeader(Constants.USER_ID_HEADER) Integer userId,
-            @Valid @RequestBody BookingDtoRequest bookingDtoRequest) {
-        log.info("Server: POST /bookings");
+            @RequestBody BookingDtoRequest bookingDtoRequest) {
+        log.info("POST /bookings");
         return ResponseEntity.ok(bookingService.create(bookingDtoRequest, userId));
     }
 
@@ -37,7 +36,7 @@ public class BookingController {
             @RequestHeader(Constants.USER_ID_HEADER) Integer userId,
             @PathVariable Integer bookingId,
             @RequestParam Boolean approved) {
-        log.info("Server: PATCH /bookings/{}", bookingId);
+        log.info("PATCH /bookings/{}", bookingId);
         return ResponseEntity.ok(bookingService.approve(bookingId, userId, approved));
     }
 
@@ -46,7 +45,7 @@ public class BookingController {
     public ResponseEntity<BookingDto> getBookingById(
             @RequestHeader(Constants.USER_ID_HEADER) Integer userId,
             @PathVariable Integer bookingId) {
-        log.info("Server: GET /bookings/{}", bookingId);
+        log.info("GET /bookings/{}", bookingId);
         return ResponseEntity.ok(bookingService.getById(bookingId, userId));
     }
 
@@ -55,7 +54,7 @@ public class BookingController {
     public ResponseEntity<List<BookingDto>> getUserBookings(
             @RequestHeader(Constants.USER_ID_HEADER) Integer userId,
             @RequestParam(name = "state", defaultValue = Constants.DEFAULT_STATE) BookingState state) {
-        log.info("Server: GET /bookings");
+        log.info("GET /bookings");
         return ResponseEntity.ok(bookingService.getUserBookings(userId, state));
     }
 
@@ -64,7 +63,7 @@ public class BookingController {
     public ResponseEntity<List<BookingDto>> getOwnerBookings(
             @RequestHeader(Constants.USER_ID_HEADER) Integer ownerId,
             @RequestParam(name = "state", defaultValue = Constants.DEFAULT_STATE) BookingState state) {
-        log.info("Server: GET /bookings/owner");
+        log.info("GET /bookings/owner");
         return ResponseEntity.ok(bookingService.getOwnerBookings(ownerId, state));
     }
 }

@@ -2,7 +2,6 @@ package ru.practicum.shareit.user;
 
 import ru.practicum.common.user.UserDto;
 import ru.practicum.common.user.UserDtoNew;
-import ru.practicum.common.user.UserDtoNew;
 
 import java.util.List;
 

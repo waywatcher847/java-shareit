@@ -8,7 +8,6 @@ import ru.practicum.common.user.UserDto;
 import ru.practicum.common.user.UserDtoNew;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 
 import java.util.List;
 
@@ -121,10 +120,10 @@ class UserIntegrationalTests {
     }
 
     @Test
-    void update_NonExistingUser_ThrowsValidationException() {
+    void update_NonExistingUser_ThrowsNotFoundException() {
         UserDtoNew updateData = UserDtoNew.builder().name("NewName").email("new@test.com").build();
 
-        assertThrows(ValidationException.class, () -> userService.update(updateData, 999));
+        assertThrows(NotFoundException.class, () -> userService.update(updateData, 999));
     }
 
     @Test

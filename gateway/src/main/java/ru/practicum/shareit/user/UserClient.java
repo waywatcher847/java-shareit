@@ -28,27 +28,27 @@ public class UserClient extends BaseClient {
     }
 
     public ResponseEntity<Object> getUserList() {
-        log.info("Request getUserList");
+        log.info("getUserList");
         return get("");
     }
 
     public ResponseEntity<Object> getUserDto(Integer id) {
-        log.info("Request getUserDto id={}", id);
+        log.info("getUserDto userId={}", id);
         return get("/" + id);
     }
 
     public ResponseEntity<Object> create(UserDtoNew userDto) {
-        log.info("Request create user data: {}", userDto);
+        log.info("create data: {}", userDto);
         return post("", userDto);
     }
 
     public ResponseEntity<Object> update(Integer userId, UserDtoNew userDto) {
-        log.info("Request update user ID={}, data: {}", userId, userDto);
+        log.info("update userId={}, data: {}", userId, userDto);
         return patch("/" + userId, userDto);
     }
 
     public ResponseEntity<Object> delete(Integer id) {
-        log.info("Request delete user id={}", id);
+        log.info("delete userId={}", id);
         return delete("/" + id);
     }
 }

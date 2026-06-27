@@ -29,22 +29,22 @@ public class ItemRequestClient extends BaseClient {
     }
 
     public ResponseEntity<Object> getRequestById(Integer userId, Integer requestId) {
-        log.info("Request getRequestById ID={}", requestId);
+        log.info("getRequestById userId={}, requestId: {}", userId, requestId);
         return get("/" + requestId, userId);
     }
 
     public ResponseEntity<Object> getUserRequests(Integer userId) {
-        log.info("Request getUserRequests ID={}", userId);
+        log.info("getUserRequests userId={}", userId);
         return get("", userId);
     }
 
     public ResponseEntity<Object> getAllRequests(Integer userId) {
-        log.info("Request getAllRequests ID={}", userId);
+        log.info("getAllRequests userId={}", userId);
         return get("/all", userId);
     }
 
     public ResponseEntity<Object> createRequest(Integer userId, @Valid ItemRequestDto itemRequestDto) {
-        log.info("Request createRequest ID={}, data: {}", userId, itemRequestDto);
+        log.info("createRequest userId={}, data: {}", userId, itemRequestDto);
         return post("", userId, itemRequestDto);
     }
 }

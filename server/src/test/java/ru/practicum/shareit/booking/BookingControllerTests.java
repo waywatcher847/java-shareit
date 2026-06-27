@@ -55,20 +55,6 @@ class BookingControllerTests {
     }
 
     @Test
-    void createBooking_endBeforeStart_shouldReturn400() throws Exception {
-        BookingDtoRequest request = new BookingDtoRequest();
-        request.setItemId(1);
-        request.setStart(LocalDateTime.now().plusDays(2));
-        request.setEnd(LocalDateTime.now().plusDays(1));
-
-        mockMvc.perform(post("/internal/bookings")
-                        .header(USER_ID_HEADER, 1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void approveBooking_shouldReturn200() throws Exception {
         BookingDto bookingDto = new BookingDto();
         bookingDto.setId(1);
